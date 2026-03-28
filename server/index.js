@@ -2,6 +2,9 @@ import 'dotenv/config';
 import express from "express";
 import cors from "cors";
 import pg from "pg";
+import { fileURLToPath } from 'url';
+import path from 'path';
+import fs from 'fs';
 
 const app = express();
 app.use(cors());
@@ -661,7 +664,18 @@ app.delete("/api/keywords/:keywordId", async (req, res) => {
   }
 });
 
-const PORT = 3001;
+// ─── 生產模式：serve 前端 build ───
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const distPath = path.join(__dirname, '..', 'dist');
+
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`\n  Threads Radar API Server`);
   console.log(`  ➜ http://localhost:${PORT}`);
@@ -671,4 +685,3 @@ app.listen(PORT, () => {
   console.log(`  ➜ POST /api/usage          (額度監控)`);
   console.log(`  ➜ GET  /api/health         (健康檢查)\n`);
 });
-

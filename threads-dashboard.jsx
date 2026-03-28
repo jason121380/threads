@@ -264,6 +264,7 @@ export default function ThreadsDashboard() {
   const [newSort, setNewSort] = useState("recent");
   const [newMaxPages, setNewMaxPages] = useState(1);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [addKeywordError, setAddKeywordError] = useState("");
   const [newScheduleTime, setNewScheduleTime] = useState("09:00");
   const [newScheduleEnabled, setNewScheduleEnabled] = useState(false);
   const [postSort, setPostSort] = useState("newest"); // newest | likes | replies | reposts
@@ -484,6 +485,7 @@ export default function ThreadsDashboard() {
   // Add keyword
   const addKeyword = async () => {
     if (!newKeyword.trim()) return;
+    setAddKeywordError("");
     try {
       const res = await fetch(`${API_BASE}/api/keywords`, {
         method: "POST",
@@ -509,15 +511,15 @@ export default function ThreadsDashboard() {
             createdAt: new Date(data.keyword.created_at || Date.now()).toISOString().split("T")[0],
           }]);
         }
+        setNewKeyword("");
+        setShowAddForm(false); // 成功才關閉
       } else {
         const err = await res.json();
-        alert(err.error || "新增失敗");
+        setAddKeywordError(err.error || "新增失敗"); // 行內顯示錯誤，不關閉表單
       }
     } catch (err) {
-      alert("新增失敗，請確認後端狀態");
+      setAddKeywordError("無法連接伺服器，請確認後端狀態");
     }
-    setNewKeyword("");
-    setShowAddForm(false);
   };
 
   // Delete keyword
@@ -1303,13 +1305,18 @@ export default function ThreadsDashboard() {
                     }}>
                       新增
                     </button>
-                    <button onClick={() => setShowAddForm(false)} style={{
+                    <button onClick={() => { setShowAddForm(false); setAddKeywordError(""); }} style={{
                       padding: "12px 22px", borderRadius: 50, border: `1px solid ${COLORS.gray200}`,
                       background: COLORS.white, color: COLORS.gray500, fontWeight: 600, fontSize: 14, cursor: "pointer",
                     }}>
                       取消
                     </button>
                   </div>
+                  {addKeywordError && (
+                    <div style={{ width: "100%", marginTop: 8, fontSize: 13, color: COLORS.red, fontWeight: 600 }}>
+                      ⚠️ {addKeywordError}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
