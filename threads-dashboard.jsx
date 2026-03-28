@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
-//  Meimate Theme Constants 
+// ─── Meimate Theme Constants ───
 const COLORS = {
   orange100: "#FFF5F0",
   orange200: "#FFE8D9",
@@ -20,11 +20,11 @@ const COLORS = {
   white: "#FFFFFF",
 };
 
-//  設設設 
+// ─── 預設關鍵字設定（非靜態資料，僅為初始設定） ───
 const DEFAULT_KEYWORDS = [];
 
 
-//  Icons (inline SVG) 
+// ─── Icons (inline SVG) ───
 const Icons = {
   Search: () => (
     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,9 +112,9 @@ const Icons = {
   ),
 };
 
-//  Utility 
+// ─── Utility ───
 const formatNum = (n) => {
-  if (n >= 10000) return (n / 10000).toFixed(1) + "";
+  if (n >= 10000) return (n / 10000).toFixed(1) + "萬";
   if (n >= 1000) return (n / 1000).toFixed(1) + "K";
   return n.toString();
 };
@@ -122,13 +122,13 @@ const formatNum = (n) => {
 const timeAgo = (ts) => {
   const diff = Date.now() - new Date(ts).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins} `;
+  if (mins < 60) return `${mins} 分鐘前`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs} `;
-  return `${Math.floor(hrs / 24)} 天`;
+  if (hrs < 24) return `${hrs} 小時前`;
+  return `${Math.floor(hrs / 24)} 天前`;
 };
 
-//  Custom Tooltip 
+// ─── Custom Tooltip ───
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -147,7 +147,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-//  Sidebar Nav Item 
+// ─── Sidebar Nav Item ───
 const SidebarNavItem = ({ active, icon, label, onClick }) => (
   <button onClick={onClick} style={{
     display: "flex", alignItems: "center", gap: 12, width: "100%",
@@ -167,7 +167,7 @@ const SidebarNavItem = ({ active, icon, label, onClick }) => (
 
 
 
-//  Stat Card 
+// ─── Stat Card ───
 const StatCard = ({ label, value, sub, icon, color }) => (
   <div style={{
     background: COLORS.white, borderRadius: 20, border: `1px solid ${COLORS.gray100}`,
@@ -189,7 +189,7 @@ const StatCard = ({ label, value, sub, icon, color }) => (
   </div>
 );
 
-//  Post Card 
+// ─── Post Card ───
 const PostCard = ({ post }) => (
   <div style={{
     background: COLORS.white, borderRadius: 20, border: `1px solid ${COLORS.gray100}`,
@@ -251,15 +251,15 @@ const PostCard = ({ post }) => (
   </div>
 );
 
-// 
-//  MAIN APP 
-// 
+// ═══════════════════════════════════════════
+// ─── MAIN APP ───
+// ═══════════════════════════════════════════
 export default function ThreadsDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [keywords, setKeywords] = useState(DEFAULT_KEYWORDS);
   const [posts, setPosts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedKeyword, setSelectedKeyword] = useState("");
+  const [selectedKeyword, setSelectedKeyword] = useState("全部");
   const [newKeyword, setNewKeyword] = useState("");
   const [newSort, setNewSort] = useState("recent");
   const [newMaxPages, setNewMaxPages] = useState(1);
@@ -276,7 +276,7 @@ export default function ThreadsDashboard() {
   const [showConfig, setShowConfig] = useState(false);
   const [confirmDeleteTarget, setConfirmDeleteTarget] = useState(null); // { id, keyword }
 
-  //   Token  LocalStorage 
+  // ─── 儲存 Token 到 LocalStorage ───
   useEffect(() => {
     if (apifyToken) {
       localStorage.setItem("APIFY_TOKEN", apifyToken);
@@ -285,8 +285,8 @@ export default function ThreadsDashboard() {
     }
   }, [apifyToken]);
 
-  //  API 串 
-  //  :3001端 port 路
+  // ─── API 串接狀態 ───
+  // 本地開發用 :3001，生產環境前後端同 port 用相對路徑
   const API_BASE = window.location.hostname === "localhost" ? "http://localhost:3001" : "";
   const [scraping, setScraping] = useState(false);
   const [scrapeProgress, setScrapeProgress] = useState(null);
@@ -298,7 +298,7 @@ export default function ThreadsDashboard() {
   const [strictKeywordFilter, setStrictKeywordFilter] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(false);
 
-  //  檢端 
+  // ─── 啟動時自動檢查後端狀態 ───
   const checkApiHealth = useCallback(async () => {
     setApiStatus(prev => ({ ...prev, server: "checking", db: "checking" }));
     try {
@@ -310,7 +310,7 @@ export default function ThreadsDashboard() {
         setApiStatus({ server: "offline", db: "offline", lastCheck: new Date().toLocaleTimeString(), error: `HTTP ${res.status}` });
       }
     } catch {
-      setApiStatus({ server: "offline", db: "offline", lastCheck: new Date().toLocaleTimeString(), error: "" });
+      setApiStatus({ server: "offline", db: "offline", lastCheck: new Date().toLocaleTimeString(), error: "無法連線" });
     }
   }, []);
 
@@ -328,7 +328,7 @@ export default function ThreadsDashboard() {
         }
       }
     } catch (err) {
-      console.error(":", err);
+      console.error("無法取得關鍵字:", err);
     }
   }, []);
 
@@ -346,7 +346,7 @@ export default function ThreadsDashboard() {
         }
       }
     } catch (err) {
-      console.error("貼:", err);
+      console.error("無法取得貼文:", err);
     }
   }, []);
 
@@ -363,7 +363,7 @@ export default function ThreadsDashboard() {
         })));
       }
     } catch (err) {
-      console.error(":", err);
+      console.error("無法取得抓取紀錄:", err);
     }
   }, []);
 
@@ -372,7 +372,7 @@ export default function ThreadsDashboard() {
     fetchKeywords();
     fetchPosts();
     fetchScrapeHistory();
-    // 已 token
+    // 若有已儲存的 token，自動靜默驗證
     const savedToken = localStorage.getItem("APIFY_TOKEN");
     if (savedToken) {
       fetch(`${API_BASE}/api/verify-token`, {
@@ -382,7 +382,7 @@ export default function ThreadsDashboard() {
       }).then(r => r.json()).then(data => {
         setTokenStatus(data);
         if (data.valid) {
-          // 度
+          // 也自動載入額度資訊
           fetch(`${API_BASE}/api/usage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -395,11 +395,11 @@ export default function ThreadsDashboard() {
     return () => clearInterval(interval);
   }, [checkApiHealth, fetchKeywords, fetchPosts, fetchScrapeHistory]);
 
-  //  實 posts 趨 
+  // ─── 從真實 posts 計算趨勢資料 ───
   const trendData = (() => {
     if (!posts.length) return {};
     const data = {};
-    // 統貼
+    // 按關鍵字分組，統計每日的貼文數與互動量
     keywords.forEach(kw => {
       const kwPosts = posts.filter(p => p.keyword === kw.keyword);
       if (!kwPosts.length) return;
@@ -447,7 +447,7 @@ export default function ThreadsDashboard() {
 
   // Filtered + sorted posts
   const filteredPosts = posts.filter(p => {
-    const matchKw = selectedKeyword === "" || p.keyword === selectedKeyword;
+    const matchKw = selectedKeyword === "全部" || p.keyword === selectedKeyword;
     const matchSearch = !searchQuery || p.caption?.toLowerCase().includes(searchQuery.toLowerCase())
       || p.user?.username?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchKw && matchSearch;
@@ -460,8 +460,8 @@ export default function ThreadsDashboard() {
     }
   }).filter(p => {
     if (!p.caption || !p.caption.trim()) return false;
-    if (strictKeywordFilter && selectedKeyword !== "") {
-      // 大寫精確符
+    if (strictKeywordFilter && selectedKeyword !== "全部") {
+      // 不分大小寫的精確符合
       return p.caption.toLowerCase().includes(selectedKeyword.toLowerCase());
     }
     return true;
@@ -476,8 +476,8 @@ export default function ThreadsDashboard() {
         body: JSON.stringify({ keyword: selectedKeyword }),
       });
       if (res.ok) {
-        //  state 移已貼
-        if (selectedKeyword === "") {
+        // 從 state 移除已封存貼文
+        if (selectedKeyword === "全部") {
           setPosts([]);
         } else {
           setPosts(prev => prev.filter(p => p.keyword !== selectedKeyword));
@@ -485,7 +485,7 @@ export default function ThreadsDashboard() {
         await fetchScrapeHistory();
       }
     } catch (err) {
-      alert("失");
+      alert("清除失敗");
     }
     setConfirmArchive(false);
   };
@@ -520,13 +520,13 @@ export default function ThreadsDashboard() {
           }]);
         }
         setNewKeyword("");
-        setShowAddForm(false); // 
+        setShowAddForm(false); // 成功才關閉
       } else {
         const err = await res.json();
-        setAddKeywordError(err.error || "失"); // 顯示誤表
+        setAddKeywordError(err.error || "新增失敗"); // 行內顯示錯誤，不關閉表單
       }
     } catch (err) {
-      setAddKeywordError("伺確端");
+      setAddKeywordError("無法連接伺服器，請確認後端狀態");
     }
   };
 
@@ -536,7 +536,7 @@ export default function ThreadsDashboard() {
       await fetch(`${API_BASE}/api/keywords/${id}`, { method: "DELETE" });
       setKeywords(prev => prev.filter(k => k.id !== id));
     } catch (err) {
-      alert("失");
+      alert("刪除失敗");
     }
   };
 
@@ -553,15 +553,15 @@ export default function ThreadsDashboard() {
         setKeywords(prev => prev.map(k => k.id === editingId ? { ...k, ...editForm, scheduleTime: editForm.schedule_time, scheduleEnabled: editForm.schedule_enabled, maxPages: editForm.max_pages, sort: editForm.sort_option } : k));
       } else {
         const err = await res.json();
-        alert(err.error || "失");
+        alert(err.error || "儲存失敗");
       }
     } catch (err) {
-      alert("失");
+      alert("儲存失敗");
     }
     setEditingId(null);
   };
 
-  //   Apify Token 
+  // ─── 驗證 Apify Token ───
   const verifyToken = async () => {
     if (!apifyToken.trim()) return;
     setTokenStatus("checking");
@@ -573,14 +573,14 @@ export default function ThreadsDashboard() {
       });
       const data = await res.json();
       setTokenStatus(data);
-      // 度
+      // 驗證成功後自動載入額度資訊
       if (data.valid) fetchUsage();
     } catch {
-      setTokenStatus({ valid: false, error: " API Server確端已 (npm run server)" });
+      setTokenStatus({ valid: false, error: "無法連接 API Server，請確認後端已啟動 (npm run server)" });
     }
   };
 
-  //  Apify 度使 
+  // ─── Apify 額度使用量 ───
   const [usageData, setUsageData] = useState(null); // { account, usage, limits, recentRuns }
   const [usageLoading, setUsageLoading] = useState(false);
 
@@ -602,10 +602,10 @@ export default function ThreadsDashboard() {
     }
   };
 
-  //   
+  // ─── 單一關鍵字抓取 ───
   const scrapeSingle = async (kw) => {
     if (!apifyToken.trim()) {
-      alert("設填 Apify API Token");
+      alert("請先在「設定」頁面填入 Apify API Token");
       return;
     }
     setScrapingSingle(kw.id);
@@ -659,15 +659,15 @@ export default function ThreadsDashboard() {
     }
   };
 
-  //  次 
+  // ─── 批次抓取所有啟用的關鍵字 ───
   const scrapeAll = async () => {
     if (!apifyToken.trim()) {
-      alert("設填 Apify API Token");
+      alert("請先在「設定」頁面填入 Apify API Token");
       return;
     }
     const enabledKeywords = keywords.filter(k => k.enabled);
     if (!enabledKeywords.length) {
-      alert("");
+      alert("沒有啟用的關鍵字");
       return;
     }
 
@@ -727,7 +727,7 @@ export default function ThreadsDashboard() {
         }
       }
     } catch (err) {
-      alert(`次失: ${err.message}`);
+      alert(`批次抓取失敗: ${err.message}`);
     } finally {
       setScraping(false);
       setScrapeProgress(null);
@@ -739,17 +739,17 @@ export default function ThreadsDashboard() {
 
   // Engagement pie data
   const engagementData = [
-    { name: "", value: posts.reduce((s, p) => s + p.like_count, 0), color: "#ef4444" },
-    { name: "", value: posts.reduce((s, p) => s + p.comment_count, 0), color: "#3B82F6" },
-    { name: "", value: posts.reduce((s, p) => s + p.repost_count, 0), color: COLORS.orange500 },
-    { name: "", value: posts.reduce((s, p) => s + p.quote_count, 0), color: COLORS.emerald },
+    { name: "讚", value: posts.reduce((s, p) => s + p.like_count, 0), color: "#ef4444" },
+    { name: "留言", value: posts.reduce((s, p) => s + p.comment_count, 0), color: "#3B82F6" },
+    { name: "轉發", value: posts.reduce((s, p) => s + p.repost_count, 0), color: COLORS.orange500 },
+    { name: "引用", value: posts.reduce((s, p) => s + p.quote_count, 0), color: COLORS.emerald },
   ];
 
   const enabledCount = keywords.filter(k => k.enabled).length;
   const totalPosts = posts.length;
   const totalEngagement = posts.reduce((s, p) => s + p.like_count + p.comment_count + p.repost_count, 0);
 
-  //  Render 
+  // ─── Render ───
   return (
     <div style={{
       minHeight: "100vh",
@@ -757,7 +757,7 @@ export default function ThreadsDashboard() {
       fontFamily: "'Inter','Noto Sans TC',system-ui,-apple-system,sans-serif",
       display: "flex",
     }}>
-      {/*  確 Modal  */}
+      {/* ─── 刪除確認 Modal ─── */}
       {confirmDeleteTarget && (
         <div style={{
           position: "fixed", inset: 0, zIndex: 1000,
@@ -769,13 +769,13 @@ export default function ThreadsDashboard() {
             width: 360, boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
             textAlign: "center",
           }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}></div>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>🗑️</div>
             <div style={{ fontSize: 16, fontWeight: 800, color: COLORS.gray900, marginBottom: 8 }}>
-              
+              刪除關鍵字
             </div>
             <div style={{ fontSize: 14, color: COLORS.gray500, marginBottom: 24 }}>
-              確<strong style={{ color: COLORS.gray900 }}>{confirmDeleteTarget.keyword}</strong><br />
-              <span style={{ fontSize: 12, color: COLORS.red }}>此復</span>
+              確定要刪除「<strong style={{ color: COLORS.gray900 }}>{confirmDeleteTarget.keyword}</strong>」嗎？<br />
+              <span style={{ fontSize: 12, color: COLORS.red }}>此操作無法復原</span>
             </div>
             <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
               <button
@@ -786,7 +786,7 @@ export default function ThreadsDashboard() {
                   cursor: "pointer",
                 }}
               >
-                
+                取消
               </button>
               <button
                 onClick={() => { deleteKeyword(confirmDeleteTarget.id); setConfirmDeleteTarget(null); }}
@@ -796,13 +796,13 @@ export default function ThreadsDashboard() {
                   cursor: "pointer", boxShadow: "0 2px 8px rgba(248,113,113,0.4)",
                 }}
               >
-                確
+                確認刪除
               </button>
             </div>
           </div>
         </div>
       )}
-      {/*  Archive 確 Modal  */}
+      {/* ─── Archive 確認 Modal ─── */}
       {confirmArchive && (
         <div style={{
           position: "fixed", inset: 0, zIndex: 1000,
@@ -814,40 +814,40 @@ export default function ThreadsDashboard() {
             width: 380, boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
             textAlign: "center",
           }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}></div>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>🗄️</div>
             <div style={{ fontSize: 16, fontWeight: 800, color: COLORS.gray900, marginBottom: 8 }}>
-              貼
+              清除貼文
             </div>
             <div style={{ fontSize: 14, color: COLORS.gray500, marginBottom: 24 }}>
-              確
+              確定要封存
               <strong style={{ color: COLORS.gray900 }}>
-                {selectedKeyword === "" ? "" : `${selectedKeyword}`}
+                {selectedKeyword === "全部" ? "所有" : `「${selectedKeyword}」`}
               </strong>
-               {filteredPosts.length} 貼<br />
-              <span style={{ fontSize: 12, color: COLORS.gray400 }}>庫被</span>
+              的 {filteredPosts.length} 則貼文嗎？<br />
+              <span style={{ fontSize: 12, color: COLORS.gray400 }}>資料會保留在資料庫，不會被刪除</span>
             </div>
             <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
               <button onClick={() => setConfirmArchive(false)} style={{
                 padding: "10px 24px", borderRadius: 50, border: `1px solid ${COLORS.gray200}`,
                 background: COLORS.white, color: COLORS.gray500, fontWeight: 600, fontSize: 14, cursor: "pointer",
-              }}></button>
+              }}>取消</button>
               <button onClick={archiveAll} style={{
                 padding: "10px 24px", borderRadius: 50, border: "none",
                 background: "#6366f1", color: COLORS.white, fontWeight: 700, fontSize: 14,
                 cursor: "pointer", boxShadow: "0 2px 8px rgba(99,102,241,0.4)",
-              }}>確</button>
+              }}>確認封存</button>
             </div>
           </div>
         </div>
       )}
-      {/*  Left Sidebar  */}
+      {/* ─── Left Sidebar ─── */}
       <aside style={{
         width: 230, minWidth: 230, height: "100vh", position: "sticky", top: 0,
         background: COLORS.white, borderRight: `1px solid ${COLORS.gray100}`,
         display: "flex", flexDirection: "column", padding: "20px 14px",
         boxSizing: "border-box", zIndex: 50,
       }}>
-        {/* Logo  GMB style */}
+        {/* Logo — GMB style */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 32, padding: "0 4px" }}>
           <div style={{
             fontSize: 13, fontWeight: 800, color: COLORS.gray900,
@@ -864,23 +864,23 @@ export default function ThreadsDashboard() {
         <nav style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
           {[
             { key: "dashboard", label: "總覽", icon: <Icons.TrendUp /> },
-            { key: "posts", label: "貼", icon: <Icons.Comment /> },
-            { key: "keywords", label: "", icon: <Icons.Search /> },
-            { key: "settings", label: "設", icon: <Icons.Settings /> },
+            { key: "posts", label: "貼文", icon: <Icons.Comment /> },
+            { key: "keywords", label: "關鍵字", icon: <Icons.Search /> },
+            { key: "settings", label: "設定", icon: <Icons.Settings /> },
           ].map(t => (
             <SidebarNavItem key={t.key} active={activeTab === t.key} icon={t.icon} label={t.label}
               onClick={() => setActiveTab(t.key)} />
           ))}
         </nav>
 
-        {/* Apify 度 */}
+        {/* Apify 額度摘要 */}
         {usageData && (
           <div style={{
             padding: "12px 14px", borderRadius: 12,
             background: COLORS.gray50, marginBottom: 8,
           }}>
             <div style={{ fontSize: 10, color: COLORS.gray400, fontWeight: 600, letterSpacing: "0.05em", marginBottom: 6, textTransform: "uppercase" }}>
-              Apify 度
+              Apify 額度
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
               <span style={{ fontSize: 14, fontWeight: 800, color: COLORS.orange500 }}>
@@ -900,7 +900,7 @@ export default function ThreadsDashboard() {
               }} />
             </div>
             <div style={{ fontSize: 10, color: COLORS.gray400 }}>
-              已使 {((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100).toFixed(1)}%
+              已使用 {((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100).toFixed(1)}%
             </div>
           </div>
         )}
@@ -915,31 +915,31 @@ export default function ThreadsDashboard() {
             background: enabledCount > 0 ? COLORS.emerald : COLORS.gray300,
           }} />
           <span style={{ fontSize: 12, color: COLORS.gray500 }}>
-            {enabledCount} 中
+            {enabledCount} 組關鍵字監控中
           </span>
         </div>
       </aside>
 
-      {/*  Main Content  */}
+      {/* ─── Main Content ─── */}
       <main style={{ flex: 1, padding: "28px 32px 80px", minWidth: 0, overflowY: "auto", maxHeight: "100vh" }}>
 
-        {/*  DASHBOARD TAB  */}
+        {/* ═══ DASHBOARD TAB ═══ */}
         {activeTab === "dashboard" && (
           <div>
             {/* Stats Row */}
             <div style={{ display: "flex", gap: 16, marginBottom: 24, flexWrap: "wrap" }}>
-              <StatCard label="追蹤" value={enabledCount} sub={` ${keywords.length} `}
+              <StatCard label="追蹤關鍵字" value={enabledCount} sub={`共 ${keywords.length} 組`}
                 icon={<Icons.Search />} color={COLORS.orange500} />
-              <StatCard label="已貼" value={totalPosts} sub={totalPosts === 0 ? "" : `${[...new Set(posts.map(p => p.keyword))].length} `}
+              <StatCard label="已收集貼文" value={totalPosts} sub={totalPosts === 0 ? "尚未抓取" : `${[...new Set(posts.map(p => p.keyword))].length} 組關鍵字`}
                 icon={<Icons.Database />} />
-              <StatCard label="總" value={formatNum(totalEngagement)} sub={totalPosts === 0 ? "---" : `${totalPosts} 貼`}
+              <StatCard label="總互動量" value={formatNum(totalEngagement)} sub={totalPosts === 0 ? "---" : `${totalPosts} 則貼文`}
                 icon={<Icons.TrendUp />} color={COLORS.orange500} />
             </div>
 
             {/* Scrape Log */}
             {scrapeLog.length > 0 && (
               <div style={{ background: COLORS.white, borderRadius: 12, border: `1px solid ${COLORS.gray100}`, padding: 14, marginBottom: 24 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.gray900, marginBottom: 8 }}>系統跡</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.gray900, marginBottom: 8 }}>近期系統抓取軌跡</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   {scrapeLog.map((log, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, padding: "4px 0" }}>
@@ -949,7 +949,7 @@ export default function ThreadsDashboard() {
                         }} />
                         <span style={{ fontWeight: 600, color: COLORS.gray900 }}>{log.keyword}</span>
                         <span style={{ color: log.status === "success" ? COLORS.emerald : COLORS.red }}>
-                          {log.status === "success" ? `${log.postCount} 貼` : log.error || "失"}
+                          {log.status === "success" ? `${log.postCount} 則貼文` : log.error || "失敗"}
                         </span>
                         <span style={{ color: COLORS.gray400, marginLeft: "auto" }}>{log.time}</span>
                       </div>
@@ -966,10 +966,10 @@ export default function ThreadsDashboard() {
                 padding: "20px 24px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
               }}>
                 <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>
-                  趨
+                  關鍵字提及趨勢
                 </div>
                 <div style={{ fontSize: 12, color: COLORS.gray400, marginBottom: 16 }}>
-                  {posts.length > 0 ? "已" : ""}
+                  {posts.length > 0 ? "依據已抓取資料" : "尚無資料"}
                 </div>
                 {posts.length === 0 ? (
                   <div style={{
@@ -977,8 +977,8 @@ export default function ThreadsDashboard() {
                     justifyContent: "center", color: COLORS.gray400, gap: 12,
                   }}>
                     <Icons.Database />
-                    <div style={{ fontSize: 14, fontWeight: 600 }}>趨</div>
-                    <div style={{ fontSize: 12 }}>設 Apify Token 並</div>
+                    <div style={{ fontSize: 14, fontWeight: 600 }}>尚無趨勢資料</div>
+                    <div style={{ fontSize: 12 }}>請先設定 Apify Token 並執行關鍵字抓取</div>
                   </div>
                 ) : (
                 <>
@@ -1022,9 +1022,9 @@ export default function ThreadsDashboard() {
                 padding: "20px 24px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
               }}>
                 <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>
-                  
+                  互動類型分佈
                 </div>
-                <div style={{ fontSize: 12, color: COLORS.gray400, marginBottom: 8 }}>已貼</div>
+                <div style={{ fontSize: 12, color: COLORS.gray400, marginBottom: 8 }}>所有已收集貼文</div>
                 <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
                     <Pie data={engagementData} cx="50%" cy="50%" innerRadius={50} outerRadius={80}
@@ -1051,12 +1051,12 @@ export default function ThreadsDashboard() {
               padding: "20px 24px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 16 }}>
-                貼 TOP 10
+                熱門貼文 TOP 10
               </div>
               {posts.length === 0 ? (
                 <div style={{ padding: "40px 0", textAlign: "center", color: COLORS.gray400 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600 }}>貼</div>
-                  <div style={{ fontSize: 12, marginTop: 4 }}>顯示</div>
+                  <div style={{ fontSize: 14, fontWeight: 600 }}>尚無貼文資料</div>
+                  <div style={{ fontSize: 12, marginTop: 4 }}>執行抓取後將自動顯示</div>
                 </div>
               ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -1095,7 +1095,7 @@ export default function ThreadsDashboard() {
           </div>
         )}
 
-        {/*  POSTS TAB  */}
+        {/* ═══ POSTS TAB ═══ */}
         {activeTab === "posts" && (
           <div>
             {/* Search + Filter */}
@@ -1106,7 +1106,7 @@ export default function ThreadsDashboard() {
                 </div>
                 <input
                   value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="貼容..."
+                  placeholder="搜尋貼文內容或用戶名..."
                   style={{
                     width: "100%", padding: "12px 16px 12px 44px", borderRadius: 50, fontSize: 14,
                     border: `1px solid ${COLORS.gray200}`, background: "rgba(249,250,251,0.8)",
@@ -1117,7 +1117,7 @@ export default function ThreadsDashboard() {
                 />
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {["", ...keywords.map(k => k.keyword)].map(kw => (
+                {["全部", ...keywords.map(k => k.keyword)].map(kw => (
                   <button key={kw} onClick={() => setSelectedKeyword(kw)} style={{
                     padding: "10px 18px", borderRadius: 50, fontSize: 13, fontWeight: 600,
                     border: selectedKeyword === kw ? `2px solid ${COLORS.orange500}` : `1px solid ${COLORS.gray200}`,
@@ -1131,13 +1131,13 @@ export default function ThreadsDashboard() {
               </div>
             </div>
 
-            {/* Post count +  +  */}
+            {/* Post count + 清除 + 排序 */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ fontSize: 13, color: COLORS.gray400 }}>
-                   {filteredPosts.length} 貼
-                  {strictKeywordFilter && selectedKeyword !== "" && (
-                    <span style={{ marginLeft: 6, fontSize: 11, color: COLORS.orange500, fontWeight: 600 }}>精確符</span>
+                  共 {filteredPosts.length} 則貼文
+                  {strictKeywordFilter && selectedKeyword !== "全部" && (
+                    <span style={{ marginLeft: 6, fontSize: 11, color: COLORS.orange500, fontWeight: 600 }}>（精確符合）</span>
                   )}
                 </div>
                 {filteredPosts.length > 0 && (
@@ -1149,16 +1149,16 @@ export default function ThreadsDashboard() {
                     onMouseEnter={e => { e.currentTarget.style.color = "#6366f1"; e.currentTarget.style.borderColor = "#6366f1"; }}
                     onMouseLeave={e => { e.currentTarget.style.color = COLORS.gray400; e.currentTarget.style.borderColor = COLORS.gray200; }}
                   >
-                     
+                    🗄️ 清除所有
                   </button>
                 )}
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {[
-                  { key: "newest",  label: "" },
-                  { key: "likes",   label: " " },
-                  { key: "replies", label: " " },
-                  { key: "reposts", label: " " },
+                  { key: "newest",  label: "最新" },
+                  { key: "likes",   label: "🤍 按讚最多" },
+                  { key: "replies", label: "💬 回覆最多" },
+                  { key: "reposts", label: "🔄 轉發最多" },
                 ].map(({ key, label }) => (
                   <button key={key} onClick={() => setPostSort(key)} style={{
                     padding: "5px 12px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
@@ -1170,7 +1170,7 @@ export default function ThreadsDashboard() {
                     {label}
                   </button>
                 ))}
-                {selectedKeyword !== "" && (
+                {selectedKeyword !== "全部" && (
                   <button onClick={() => setStrictKeywordFilter(v => !v)} style={{
                     padding: "5px 12px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
                     border: strictKeywordFilter ? "none" : `1px solid ${COLORS.gray200}`,
@@ -1178,7 +1178,7 @@ export default function ThreadsDashboard() {
                     color: strictKeywordFilter ? COLORS.white : COLORS.gray500,
                     transition: "all 0.15s",
                   }}>
-                     精確符
+                    🎯 精確符合
                   </button>
                 )}
               </div>
@@ -1192,12 +1192,12 @@ export default function ThreadsDashboard() {
                 <div style={{ textAlign: "center", padding: 60, color: COLORS.gray400 }}>
                   <div style={{ marginBottom: 12, color: COLORS.gray300 }}><Icons.Search /></div>
                   <div style={{ fontSize: 15, fontWeight: 600 }}>
-                    {posts.length === 0 ? "貼" : "符件貼"}
+                    {posts.length === 0 ? "尚無貼文資料" : "沒有符合條件的貼文"}
                   </div>
                   <div style={{ fontSize: 13, marginTop: 6 }}>
                     {posts.length === 0
-                      ? "確已設 Apify Token並"
-                      : "試試調件篩"
+                      ? "請確保已設定 Apify Token，並至「關鍵字」分頁執行手動抓取或等待自動排程"
+                      : "試試調整搜尋條件或關鍵字篩選"
                     }
                   </div>
                 </div>
@@ -1206,13 +1206,13 @@ export default function ThreadsDashboard() {
           </div>
         )}
 
-        {/*  KEYWORDS TAB  */}
+        {/* ═══ KEYWORDS TAB ═══ */}
         {activeTab === "keywords" && (
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.orange500 }}>管</div>
-                <div style={{ fontSize: 13, color: COLORS.gray400, marginTop: 4 }}>管 Threads 追蹤Apify Actor </div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.orange500 }}>關鍵字管理</div>
+                <div style={{ fontSize: 13, color: COLORS.gray400, marginTop: 4 }}>管理你的 Threads 追蹤關鍵字，Apify Actor 將按排程抓取</div>
               </div>
               <button onClick={() => setShowAddForm(!showAddForm)} style={{
                 display: "flex", alignItems: "center", gap: 6, padding: "10px 22px",
@@ -1220,7 +1220,7 @@ export default function ThreadsDashboard() {
                 background: COLORS.orange500, color: COLORS.white, transition: "all 0.2s",
                 boxShadow: "0 2px 8px rgba(255,107,44,0.25)",
               }}>
-                <Icons.Plus /> 
+                <Icons.Plus /> 新增關鍵字
               </button>
             </div>
 
@@ -1230,14 +1230,14 @@ export default function ThreadsDashboard() {
                 background: COLORS.white, borderRadius: 20, border: `2px solid ${COLORS.orange200}`,
                 padding: 24, marginBottom: 20, boxShadow: "0 4px 20px rgba(255,107,44,0.08)",
               }}>
-                <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 16 }}>追蹤</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 16 }}>新增追蹤關鍵字</div>
                 <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-end" }}>
                   <div style={{ flex: 2, minWidth: 200 }}>
                     <label style={{ fontSize: 12, fontWeight: 600, color: COLORS.gray500, marginBottom: 6, display: "block" }}>
-                       / Hashtag
+                      關鍵字 / Hashtag
                     </label>
                     <input value={newKeyword} onChange={e => setNewKeyword(e.target.value)}
-                      placeholder='AI, #, "machine learning"'
+                      placeholder='例：AI, #台灣, "machine learning"'
                       style={{
                         width: "100%", padding: "12px 18px", borderRadius: 50, fontSize: 14,
                         border: `1px solid ${COLORS.gray200}`, background: "rgba(249,250,251,0.8)",
@@ -1249,19 +1249,19 @@ export default function ThreadsDashboard() {
                     />
                   </div>
                   <div style={{ minWidth: 120 }}>
-                    <label style={{ fontSize: 12, fontWeight: 600, color: COLORS.gray500, marginBottom: 6, display: "block" }}></label>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: COLORS.gray500, marginBottom: 6, display: "block" }}>排序</label>
                     <select value={newSort} onChange={e => setNewSort(e.target.value)} style={{
                       width: "100%", padding: "12px 18px", borderRadius: 50, fontSize: 14,
                       border: `1px solid ${COLORS.gray200}`, background: "rgba(249,250,251,0.8)",
                       outline: "none", cursor: "pointer",
                     }}>
-                      <option value="recent"> (Recent)</option>
-                      <option value="top"> (Top)</option>
+                      <option value="recent">最新 (Recent)</option>
+                      <option value="top">熱門 (Top)</option>
                     </select>
                   </div>
                   <div style={{ minWidth: 100 }}>
                     <label style={{ fontSize: 12, fontWeight: 600, color: COLORS.gray500, marginBottom: 6, display: "block" }}>
-                      深度 () <span title="1=20大">(?)</span>
+                      抓取深度 (頁) <span title="1頁約=20篇文。數字越大抓越久">(?)</span>
                     </label>
                     <input type="number" min={1} max={20} value={newMaxPages}
                       onChange={e => setNewMaxPages(parseInt(e.target.value) || 5)}
@@ -1274,7 +1274,7 @@ export default function ThreadsDashboard() {
                   </div>
                   <div style={{ minWidth: 120 }}>
                     <label style={{ fontSize: 12, fontWeight: 600, color: COLORS.gray500, marginBottom: 6, display: "block" }}>
-                      
+                      每日排程時間
                     </label>
                     <input type="time" value={newScheduleTime} onChange={e => setNewScheduleTime(e.target.value)}
                       style={{
@@ -1284,7 +1284,7 @@ export default function ThreadsDashboard() {
                       }}
                     />
                   </div>
-                  {/*  */}
+                  {/* 排程開關 */}
                   <div style={{ minWidth: 100, display: "flex", flexDirection: "column", justifyContent: "flex-end", paddingBottom: 4 }}>
                     <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", userSelect: "none" }}>
                       <div
@@ -1302,7 +1302,7 @@ export default function ThreadsDashboard() {
                         }} />
                       </div>
                       <span style={{ fontSize: 12, fontWeight: 600, color: newScheduleEnabled ? COLORS.orange500 : COLORS.gray400 }}>
-                        
+                        每日排程
                       </span>
                     </label>
                   </div>
@@ -1311,18 +1311,18 @@ export default function ThreadsDashboard() {
                       padding: "12px 28px", borderRadius: 50, border: "none", cursor: "pointer",
                       background: COLORS.orange500, color: COLORS.white, fontWeight: 600, fontSize: 14,
                     }}>
-                      
+                      新增
                     </button>
                     <button onClick={() => { setShowAddForm(false); setAddKeywordError(""); }} style={{
                       padding: "12px 22px", borderRadius: 50, border: `1px solid ${COLORS.gray200}`,
                       background: COLORS.white, color: COLORS.gray500, fontWeight: 600, fontSize: 14, cursor: "pointer",
                     }}>
-                      
+                      取消
                     </button>
                   </div>
                   {addKeywordError && (
                     <div style={{ width: "100%", marginTop: 8, fontSize: 13, color: COLORS.red, fontWeight: 600 }}>
-                       {addKeywordError}
+                      ⚠️ {addKeywordError}
                     </div>
                   )}
                 </div>
@@ -1353,14 +1353,14 @@ export default function ThreadsDashboard() {
                         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                           <input value={editForm.keyword} onChange={e => setEditForm({...editForm, keyword: e.target.value})} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${COLORS.gray200}`, fontSize: 13 }} />
                           <select value={editForm.sort_option} onChange={e => setEditForm({...editForm, sort_option: e.target.value})} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${COLORS.gray200}`, fontSize: 13 }}>
-                            <option value="recent"></option>
-                            <option value="top"></option>
+                            <option value="recent">最新</option>
+                            <option value="top">熱門</option>
                           </select>
-                          <span style={{ fontSize: 12, color: COLORS.gray500 }}>深度 ( {editForm.max_pages * 15} )</span>
+                          <span style={{ fontSize: 12, color: COLORS.gray500 }}>深度 (約 {editForm.max_pages * 15} 筆)</span>
                           <input type="number" min={1} max={20} value={editForm.max_pages} onChange={e => setEditForm({...editForm, max_pages: parseInt(e.target.value) || 1})} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${COLORS.gray200}`, fontSize: 13, width: 50 }} />
-                          <span style={{ fontSize: 12, color: COLORS.gray500 }}></span>
+                          <span style={{ fontSize: 12, color: COLORS.gray500 }}>排程</span>
                           <input type="time" value={editForm.schedule_time} onChange={e => setEditForm({...editForm, schedule_time: e.target.value})} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${COLORS.gray200}`, fontSize: 13 }} />
-                          {/*  */}
+                          {/* 排程開關 */}
                           <div
                             onClick={() => setEditForm({...editForm, schedule_enabled: !editForm.schedule_enabled})}
                             style={{
@@ -1376,17 +1376,17 @@ export default function ThreadsDashboard() {
                             }} />
                           </div>
                           <span style={{ fontSize: 12, color: editForm.schedule_enabled ? COLORS.orange500 : COLORS.gray400, fontWeight: 600 }}>
-                            {editForm.schedule_enabled ? "" : ""}
+                            {editForm.schedule_enabled ? "排程開啟" : "排程關閉"}
                           </span>
                         </div>
                       ) : (
                         <>
                           <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.gray900 }}>{k.keyword}</div>
                           <div style={{ fontSize: 13, color: COLORS.gray400, marginTop: 2 }}>
-                            : {k.sort === "recent" ? "" : ""} · 深度: {k.maxPages}  ( {k.maxPages * 15} ) · 建: {k.createdAt}
+                            排序: {k.sort === "recent" ? "最新" : "熱門"} · 抓取深度: {k.maxPages} 頁 (約 {k.maxPages * 15} 筆) · 建立: {k.createdAt}
                             {k.scheduleEnabled && (
                               <span style={{ marginLeft: 6, color: COLORS.orange500 }}>
-                                ·  {k.scheduleTime || "09:00"}中
+                                · 🕒 {k.scheduleTime || "09:00"}（排程中）
                               </span>
                             )}
                           </div>
@@ -1398,10 +1398,10 @@ export default function ThreadsDashboard() {
                     {editingId === k.id ? (
                       <>
                         <button onClick={saveEditKeyword} style={{ background: COLORS.emerald, color: COLORS.white, padding: "8px 16px", borderRadius: 50, border: "none", cursor: "pointer", fontWeight: 600, fontSize: 13 }}>
-                          <span style={{ display: "flex", gap: 6, alignItems: "center" }}><Icons.Check /> </span>
+                          <span style={{ display: "flex", gap: 6, alignItems: "center" }}><Icons.Check /> 儲存</span>
                         </button>
                         <button onClick={() => setEditingId(null)} style={{ background: COLORS.white, color: COLORS.gray500, border: `1px solid ${COLORS.gray200}`, padding: "8px 16px", borderRadius: 50, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>
-                          
+                          取消
                         </button>
                       </>
                     ) : (
@@ -1416,7 +1416,7 @@ export default function ThreadsDashboard() {
                             opacity: !apifyToken.trim() ? 0.4 : 1,
                             position: "relative",
                           }}>
-                            {/* 度 */}
+                            {/* 進度條底色 */}
                             {scrapingSingle === k.id && (
                               <div style={{
                                 position: "absolute", top: 0, left: 0, bottom: 0,
@@ -1426,9 +1426,9 @@ export default function ThreadsDashboard() {
                                 zIndex: 0,
                               }} />
                             )}
-                            {/* 層 */}
+                            {/* 文字蓋在最上層 */}
                             <span style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-                              {scrapingSingle === k.id ? `中 ${Math.round(scrapeSingleProgress[k.id] || 0)}%` : ""}
+                              {scrapingSingle === k.id ? `抓取中 ${Math.round(scrapeSingleProgress[k.id] || 0)}%` : "開始抓取"}
                             </span>
                           </button>
                         </div>
@@ -1459,32 +1459,32 @@ export default function ThreadsDashboard() {
           </div>
         )}
 
-        {/*  SETTINGS TAB  */}
+        {/* ═══ SETTINGS TAB ═══ */}
         {activeTab === "settings" && (
           <div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.orange500, marginBottom: 20 }}>系統設</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.orange500, marginBottom: 20 }}>系統設定</div>
 
-            {/* API 串 */}
+            {/* API 串接狀態面板 */}
             <div style={{
               background: COLORS.white, borderRadius: 20, border: `1px solid ${COLORS.gray100}`,
               padding: 24, marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                 <div>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>API 串</div>
-                  <div style={{ fontSize: 13, color: COLORS.gray400 }}>系統</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>API 串接狀態</div>
+                  <div style={{ fontSize: 13, color: COLORS.gray400 }}>即時監控系統各項服務的連線狀態</div>
                 </div>
                 <button onClick={checkApiHealth} style={{
                   padding: "8px 18px", borderRadius: 50, border: `1px solid ${COLORS.gray200}`,
                   background: COLORS.white, color: COLORS.gray500, fontSize: 12, fontWeight: 600,
                   cursor: "pointer", transition: "all 0.2s",
                 }}>
-                  檢
+                  重新檢查
                 </button>
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
-                {/* 端伺 */}
+                {/* 後端伺服器 */}
                 <div style={{
                   background: apiStatus.server === "online" ? "#F0FDF4" : apiStatus.server === "checking" ? COLORS.gray50 : "#FEF2F2",
                   border: `1px solid ${apiStatus.server === "online" ? "#BBF7D0" : apiStatus.server === "checking" ? COLORS.gray200 : "#FECACA"}`,
@@ -1497,19 +1497,19 @@ export default function ThreadsDashboard() {
                       boxShadow: apiStatus.server === "online" ? `0 0 6px ${COLORS.emerald}` : "none",
                       animation: apiStatus.server === "checking" ? "pulse 1.5s ease-in-out infinite" : "none",
                     }} />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.gray900 }}>端伺</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.gray900 }}>後端伺服器</span>
                   </div>
                   <div style={{
                     fontSize: 14, fontWeight: 800, marginBottom: 4,
                     color: apiStatus.server === "online" ? COLORS.emerald : apiStatus.server === "checking" ? COLORS.gray400 : COLORS.red,
                   }}>
-                    {apiStatus.server === "online" ? "已" : apiStatus.server === "checking" ? "檢中..." : ""}
+                    {apiStatus.server === "online" ? "已連線" : apiStatus.server === "checking" ? "檢查中..." : "離線"}
                   </div>
                   <div style={{ fontSize: 11, color: COLORS.gray400 }}>
                     {apiStatus.server === "online" ? `localhost:3001` : apiStatus.error || ""}
                   </div>
                   {apiStatus.lastCheck && (
-                    <div style={{ fontSize: 10, color: COLORS.gray400, marginTop: 4 }}>次檢: {apiStatus.lastCheck}</div>
+                    <div style={{ fontSize: 10, color: COLORS.gray400, marginTop: 4 }}>上次檢查: {apiStatus.lastCheck}</div>
                   )}
                 </div>
 
@@ -1530,14 +1530,14 @@ export default function ThreadsDashboard() {
                     fontSize: 14, fontWeight: 800, marginBottom: 4,
                     color: tokenStatus?.valid ? COLORS.emerald : !apifyToken.trim() ? COLORS.gray400 : tokenStatus ? COLORS.red : "#F59E0B",
                   }}>
-                    {tokenStatus?.valid ? "已" : !apifyToken.trim() ? "設" : tokenStatus ? "失" : ""}
+                    {tokenStatus?.valid ? "已驗證" : !apifyToken.trim() ? "未設定" : tokenStatus ? "驗證失敗" : "待驗證"}
                   </div>
                   <div style={{ fontSize: 11, color: COLORS.gray400 }}>
-                    {tokenStatus?.valid ? tokenStatus.user?.username || "" : !apifyToken.trim() ? "填" : ""}
+                    {tokenStatus?.valid ? tokenStatus.user?.username || "" : !apifyToken.trim() ? "請在下方填入" : ""}
                   </div>
                 </div>
 
-                {/* 庫 PostgreSQL */}
+                {/* 資料庫 PostgreSQL */}
                 <div style={{
                   background: apiStatus.db === "connected" ? "#F0FDF4" : apiStatus.db === "checking" ? COLORS.gray50 : "#FEF2F2",
                   border: `1px solid ${apiStatus.db === "connected" ? "#BBF7D0" : apiStatus.db === "checking" ? COLORS.gray200 : "#FECACA"}`,
@@ -1556,14 +1556,14 @@ export default function ThreadsDashboard() {
                     fontSize: 14, fontWeight: 800, marginBottom: 4,
                     color: apiStatus.db === "connected" ? COLORS.emerald : apiStatus.db === "checking" ? COLORS.gray400 : COLORS.red,
                   }}>
-                    {apiStatus.db === "connected" ? "" : apiStatus.db === "checking" ? "檢中..." : ""}
+                    {apiStatus.db === "connected" ? "連線成功" : apiStatus.db === "checking" ? "檢查中..." : "未連線"}
                   </div>
                   <div style={{ fontSize: 11, color: COLORS.gray400 }}>
-                    {apiStatus.db === "connected" ? "已寫" : "確 DATABASE_URL"}
+                    {apiStatus.db === "connected" ? "已寫入準備" : "請確認 DATABASE_URL"}
                   </div>
                 </div>
 
-                {/*  */}
+                {/* 資料狀態 */}
                 <div style={{
                   background: posts.length > 0 ? "#F0FDF4" : COLORS.gray50,
                   border: `1px solid ${posts.length > 0 ? "#BBF7D0" : COLORS.gray200}`,
@@ -1574,33 +1574,33 @@ export default function ThreadsDashboard() {
                       width: 8, height: 8, borderRadius: "50%",
                       background: posts.length > 0 ? COLORS.emerald : COLORS.gray300,
                     }} />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.gray900 }}></span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.gray900 }}>資料狀態</span>
                   </div>
                   <div style={{
                     fontSize: 14, fontWeight: 800, marginBottom: 4,
                     color: posts.length > 0 ? COLORS.emerald : COLORS.gray400,
                   }}>
-                    {posts.length > 0 ? `${posts.length} 貼` : ""}
+                    {posts.length > 0 ? `${posts.length} 則貼文` : "尚無資料"}
                   </div>
                   <div style={{ fontSize: 11, color: COLORS.gray400 }}>
                     {posts.length > 0
-                      ? `涵 ${[...new Set(posts.map(p => p.keyword))].length} `
-                      : ""
+                      ? `涵蓋 ${[...new Set(posts.map(p => p.keyword))].length} 組關鍵字`
+                      : "請執行抓取"
                     }
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* 度使 */}
+            {/* 額度使用量監控 */}
             <div style={{
               background: COLORS.white, borderRadius: 20, border: `1px solid ${COLORS.gray100}`,
               padding: 24, marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                 <div>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>度使</div>
-                  <div style={{ fontSize: 13, color: COLORS.gray400 }}> Apify 帳 API 度</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>額度使用量</div>
+                  <div style={{ fontSize: 13, color: COLORS.gray400 }}>監控 Apify 帳戶的 API 消耗額度與執行記錄</div>
                 </div>
                 <button onClick={fetchUsage} disabled={!apifyToken.trim() || usageLoading} style={{
                   padding: "8px 18px", borderRadius: 50, border: `1px solid ${COLORS.orange500}`,
@@ -1608,20 +1608,20 @@ export default function ThreadsDashboard() {
                   fontSize: 12, fontWeight: 600, cursor: !apifyToken.trim() ? "not-allowed" : "pointer",
                   transition: "all 0.2s", opacity: !apifyToken.trim() ? 0.4 : 1,
                 }}>
-                  {usageLoading ? "中..." : ""}
+                  {usageLoading ? "載入中..." : "重新載入"}
                 </button>
               </div>
 
               {!usageData ? (
                 <div style={{ padding: "40px 0", textAlign: "center", color: COLORS.gray400 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>度</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>尚未載入額度資訊</div>
                   <div style={{ fontSize: 12 }}>
-                    {apifyToken.trim() ? " Token " : "填 Apify Token"}
+                    {apifyToken.trim() ? "點擊「重新載入」或完成 Token 驗證後自動載入" : "請先填入 Apify Token"}
                   </div>
                 </div>
               ) : (
                 <>
-                  {/* 使度 */}
+                  {/* 使用量進度條 */}
                   <div style={{
                     background: COLORS.gray50, borderRadius: 12, padding: 20, marginBottom: 16,
                   }}>
@@ -1635,7 +1635,7 @@ export default function ThreadsDashboard() {
                         </span>
                       </div>
                       <div style={{ fontSize: 12, color: COLORS.gray500, fontWeight: 600 }}>
-                        {usageData.account.plan} 
+                        {usageData.account.plan} 方案
                       </div>
                     </div>
                     {/* Progress bar */}
@@ -1652,51 +1652,53 @@ export default function ThreadsDashboard() {
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
                       <span style={{ fontSize: 11, color: COLORS.gray400 }}>
-                        已使 {((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100).toFixed(1)}%
+                        已使用 {((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100).toFixed(1)}%
                       </span>
                       <span style={{ fontSize: 11, color: COLORS.gray400 }}>
-                         ${parseFloat((usageData.usage.monthlyLimitUsd - usageData.usage.monthlyUsageUsd).toFixed(2))} USD
+                        剩餘 ${parseFloat((usageData.usage.monthlyLimitUsd - usageData.usage.monthlyUsageUsd).toFixed(2))} USD
                       </span>
                     </div>
                   </div>
 
-                  {/* 帳 */}
+                  {/* 帳戶與限額資訊 */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
                     <div style={{ background: COLORS.gray50, borderRadius: 10, padding: "12px 16px" }}>
-                      <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}>帳</div>
+                      <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}>帳號</div>
                       <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900 }}>
                         {usageData.account.username}
                       </div>
                     </div>
                     <div style={{ background: COLORS.gray50, borderRadius: 10, padding: "12px 16px" }}>
-                      <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}></div>
+                      <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}>記憶體上限</div>
                       <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900 }}>
                         {(usageData.limits.maxMemoryMbytes / 1024).toFixed(0)} GB
                       </div>
                     </div>
                     <div style={{ background: COLORS.gray50, borderRadius: 10, padding: "12px 16px" }}>
-                      <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}></div>
+                      <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}>資料保留</div>
                       <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900 }}>
                         {usageData.limits.dataRetentionDays} 天
                       </div>
                     </div>
                   </div>
 
-                  {/* 顯示實中 */}
+                  {/* 最近執行記錄：只顯示有實際數據或執行中的記錄 */}
                   {usageData.recentRuns?.filter(r => r.usageTotalUsd > 0 || r.computeUnits > 0 || r.status === "RUNNING").length > 0 && (
                     <div style={{ marginTop: 20 }}>
                       <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900, marginBottom: 10 }}>
-                         ({usageData.recentRuns.filter(r => r.usageTotalUsd > 0 || r.computeUnits > 0 || r.status === "RUNNING").length})
+                        近期執行記錄 ({usageData.recentRuns.filter(r => r.usageTotalUsd > 0 || r.computeUnits > 0 || r.status === "RUNNING").length})
                       </div>
                       <div style={{ borderRadius: 10, border: `1px solid ${COLORS.gray100}`, overflow: "hidden" }}>
                         <div style={{
-                          display: "grid", gridTemplateColumns: "80px 1fr 100px",
+                          display: "grid", gridTemplateColumns: "70px 1fr 80px 80px 70px",
                           background: COLORS.gray50, padding: "8px 14px", fontSize: 11, fontWeight: 600,
                           color: COLORS.gray500,
                         }}>
-                          <div></div>
-                          <div></div>
-                          <div style={{ textAlign: "right" }}>費</div>
+                          <div>狀態</div>
+                          <div>執行時間</div>
+                          <div style={{ textAlign: "right" }}>費用</div>
+                          <div style={{ textAlign: "right" }}>運算單位</div>
+                          <div style={{ textAlign: "right" }}>耗時</div>
                         </div>
                         {usageData.recentRuns
                           .filter(r => r.usageTotalUsd > 0 || r.computeUnits > 0 || r.status === "RUNNING")
@@ -1714,7 +1716,7 @@ export default function ThreadsDashboard() {
                                 background: run.status === "SUCCEEDED" ? "#D1FAE5" : run.status === "RUNNING" ? "#DBEAFE" : "#FEE2E2",
                                 color: run.status === "SUCCEEDED" ? "#065F46" : run.status === "RUNNING" ? "#1E40AF" : "#991B1B",
                               }}>
-                                {run.status === "SUCCEEDED" ? "" : run.status === "RUNNING" ? "中" : "失"}
+                                {run.status === "SUCCEEDED" ? "成功" : run.status === "RUNNING" ? "執行中" : "失敗"}
                               </span>
                             </div>
                             <div style={{ color: COLORS.gray500 }}>
@@ -1743,9 +1745,9 @@ export default function ThreadsDashboard() {
               background: COLORS.white, borderRadius: 20, border: `1px solid ${COLORS.gray100}`,
               padding: 24, marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>Apify API 設</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>Apify API 設定</div>
               <div style={{ fontSize: 13, color: COLORS.gray400, marginBottom: 16 }}>
-                 Apify 平以 Threads 
+                連接 Apify 平台以啟用自動化 Threads 數據抓取
               </div>
 
               <div style={{ marginBottom: 16 }}>
@@ -1770,7 +1772,7 @@ export default function ThreadsDashboard() {
                     fontSize: 12, color: COLORS.orange500, background: "none", border: "none",
                     cursor: "pointer", fontWeight: 600,
                   }}>
-                    {showConfig ? " Token" : "顯示 Token"}
+                    {showConfig ? "隱藏 Token" : "顯示 Token"}
                   </button>
                   <button onClick={verifyToken} disabled={!apifyToken.trim() || tokenStatus === "checking"} style={{
                     padding: "6px 18px", borderRadius: 50, border: `1px solid ${COLORS.orange500}`,
@@ -1778,7 +1780,7 @@ export default function ThreadsDashboard() {
                     cursor: !apifyToken.trim() ? "not-allowed" : "pointer", transition: "all 0.2s",
                     opacity: !apifyToken.trim() ? 0.4 : 1,
                   }}>
-                    {tokenStatus === "checking" ? "中..." : " Token"}
+                    {tokenStatus === "checking" ? "驗證中..." : "驗證 Token"}
                   </button>
                   {tokenStatus && tokenStatus !== "checking" && (
                     <span style={{
@@ -1786,8 +1788,8 @@ export default function ThreadsDashboard() {
                       color: tokenStatus.valid ? COLORS.emerald : COLORS.red,
                     }}>
                       {tokenStatus.valid
-                        ? `Token  (${tokenStatus.user?.username || ""})`
-                        : `Token : ${tokenStatus.error || "誤"}`
+                        ? `Token 有效 (${tokenStatus.user?.username || ""})`
+                        : `Token 無效: ${tokenStatus.error || "未知錯誤"}`
                       }
                     </span>
                   )}
