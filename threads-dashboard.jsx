@@ -286,7 +286,8 @@ export default function ThreadsDashboard() {
   }, [apifyToken]);
 
   // ─── API 串接狀態 ───
-  const API_BASE = "http://localhost:3001";
+  // 本地開發用 :3001，生產環境前後端同 port 用相對路徑
+  const API_BASE = window.location.hostname === "localhost" ? "http://localhost:3001" : "";
   const [scraping, setScraping] = useState(false);
   const [scrapeProgress, setScrapeProgress] = useState(null);
   const [scrapeLog, setScrapeLog] = useState([]);
