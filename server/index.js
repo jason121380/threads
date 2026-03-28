@@ -337,7 +337,10 @@ app.post("/api/scrape-all", async (req, res) => {
     }
   }
 
-  res.write(`data: ${JSON.stringify({ type: "done", totalPosts: allPosts.length, posts: allPosts, logs })}\n\n`);
+  // [新增] 回傳前進行去重，避免多個關鍵字搜到同一篇貼文
+  const uniquePosts = Array.from(new Map(allPosts.map(p => [p.id, p])).values());
+
+  res.write(`data: ${JSON.stringify({ type: "done", totalPosts: uniquePosts.length, posts: uniquePosts, logs })}\n\n`);
   res.end();
 });
 

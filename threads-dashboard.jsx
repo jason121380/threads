@@ -1044,7 +1044,7 @@ export default function ThreadsDashboard() {
               padding: "20px 24px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 16 }}>
-                熱門貼文 TOP 5
+                熱門貼文 TOP 10
               </div>
               {posts.length === 0 ? (
                 <div style={{ padding: "40px 0", textAlign: "center", color: COLORS.gray400 }}>
@@ -1054,7 +1054,7 @@ export default function ThreadsDashboard() {
               ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {[...posts].sort((a, b) => (b.like_count + b.repost_count) - (a.like_count + a.repost_count))
-                  .slice(0, 5).map((p, i) => (
+                  .slice(0, 10).map((p, i) => (
                   <div key={p.id} style={{
                     display: "flex", alignItems: "center", gap: 14, padding: "12px 16px",
                     borderRadius: 14, background: i === 0 ? COLORS.orange100 : COLORS.gray50,
@@ -1675,11 +1675,11 @@ export default function ThreadsDashboard() {
                     </div>
                   </div>
 
-                  {/* 最近執行記錄 */}
-                  {usageData.recentRuns?.length > 0 && (
-                    <div>
+                  {/* 最近執行記錄：只顯示有實際數據或執行中的記錄 */}
+                  {usageData.recentRuns?.filter(r => r.usageTotalUsd > 0 || r.computeUnits > 0 || r.status === "RUNNING").length > 0 && (
+                    <div style={{ marginTop: 20 }}>
                       <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900, marginBottom: 10 }}>
-                        近期執行記錄 ({usageData.recentRuns.length})
+                        近期執行記錄 ({usageData.recentRuns.filter(r => r.usageTotalUsd > 0 || r.computeUnits > 0 || r.status === "RUNNING").length})
                       </div>
                       <div style={{ borderRadius: 10, border: `1px solid ${COLORS.gray100}`, overflow: "hidden" }}>
                         <div style={{
@@ -1693,7 +1693,9 @@ export default function ThreadsDashboard() {
                           <div style={{ textAlign: "right" }}>運算單位</div>
                           <div style={{ textAlign: "right" }}>耗時</div>
                         </div>
-                        {usageData.recentRuns.map((run, i) => (
+                        {usageData.recentRuns
+                          .filter(r => r.usageTotalUsd > 0 || r.computeUnits > 0 || r.status === "RUNNING")
+                          .map((run, i) => (
                           <div key={run.id} style={{
                             display: "grid", gridTemplateColumns: "70px 1fr 80px 80px 70px",
                             padding: "8px 14px", fontSize: 12, borderTop: `1px solid ${COLORS.gray100}`,
