@@ -337,7 +337,13 @@ export default function ThreadsDashboard() {
       const res = await fetch(`${API_BASE}/api/posts?limit=500`);
       if (res.ok) {
         const data = await res.json();
-        if (data.posts) setPosts(data.posts);
+        if (data.posts) {
+          // 強制全局去重，避免資料庫或 API 內部有髒資料導致重複
+          setPosts(prev => {
+            const merged = [...data.posts, ...prev];
+            return Array.from(new Map(merged.map(p => [p.id, p])).values());
+          });
+        }
       }
     } catch (err) {
       console.error("貼:", err);
@@ -629,9 +635,9 @@ export default function ThreadsDashboard() {
       const data = await res.json();
       if (data.success && data.posts?.length) {
         setPosts(prev => {
-          const existingIds = new Set(prev.map(p => p.id));
-          const newPosts = data.posts.filter(p => !existingIds.has(p.id));
-          return [...newPosts, ...prev];
+          // 透過 Map 強制全局去重
+          const merged = [...(data.posts || []), ...prev];
+          return Array.from(new Map(merged.map(p => [p.id, p])).values());
         });
         setScrapeLog(prev => [...prev, { keyword: kw.keyword, status: "success", postCount: data.postCount, time: new Date().toLocaleTimeString() }]);
       } else if (data.error) {
@@ -706,9 +712,9 @@ export default function ThreadsDashboard() {
               } else if (event.type === "done") {
                 if (event.posts?.length) {
                   setPosts(prev => {
-                    const existingIds = new Set(prev.map(p => p.id));
-                    const newPosts = event.posts.filter(p => !existingIds.has(p.id));
-                    return [...newPosts, ...prev];
+                    // 透過 Map 強制全局去重
+                    const merged = [...event.posts, ...prev];
+                    return Array.from(new Map(merged.map(p => [p.id, p])).values());
                   });
                 }
                 // Add failed logs

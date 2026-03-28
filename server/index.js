@@ -504,14 +504,21 @@ app.get("/api/posts", async (req, res) => {
   if (!pool) return res.json({ success: true, posts: [] });
   try {
     const { keyword, limit = 500 } = req.query;
-    let query = "SELECT * FROM threads_posts WHERE is_archived = false";
-    const params = [];
-    if (keyword && keyword !== "全部") {
-      query += " AND keyword = $1";
-      params.push(keyword);
-    }
-    query += ` ORDER BY scraped_at DESC LIMIT $${params.length + 1}`;
-    params.push(parseInt(limit));
+    // 使用 DISTINCT ON (thread_id) 確保回傳內容絕對不重複，並內建排序邏輯
+    let query = `
+      SELECT * FROM (
+        SELECT DISTINCT ON (thread_id) * 
+        FROM threads_posts 
+        WHERE is_archived = false
+        ${keyword && keyword !== "全部" ? "AND keyword = $2" : ""}
+        ORDER BY thread_id, scraped_at DESC
+      ) t
+      ORDER BY post_timestamp DESC NULLS LAST, scraped_at DESC
+      LIMIT $1
+    `;
+    const params = [parseInt(limit)];
+    if (keyword && keyword !== "全部") params.push(keyword);
+    
     const result = await pool.query(query, params);
     // 正規化回前端格式
     const posts = result.rows.map(row => ({
