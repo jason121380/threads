@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
-// âââ Meimate Theme Constants âââ
+//  Meimate Theme Constants 
 const COLORS = {
   orange100: "#FFF5F0",
   orange200: "#FFE8D9",
@@ -20,11 +20,11 @@ const COLORS = {
   white: "#FFFFFF",
 };
 
-// âââ éè¨­ééµå­è¨­å®ï¼ééæè³æï¼åçºåå§è¨­å®ï¼ âââ
+//  è¨­è¨­è¨­ 
 const DEFAULT_KEYWORDS = [];
 
 
-// âââ Icons (inline SVG) âââ
+//  Icons (inline SVG) 
 const Icons = {
   Search: () => (
     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,9 +112,9 @@ const Icons = {
   ),
 };
 
-// âââ Utility âââ
+//  Utility 
 const formatNum = (n) => {
-  if (n >= 10000) return (n / 10000).toFixed(1) + "è¬";
+  if (n >= 10000) return (n / 10000).toFixed(1) + "";
   if (n >= 1000) return (n / 1000).toFixed(1) + "K";
   return n.toString();
 };
@@ -122,13 +122,13 @@ const formatNum = (n) => {
 const timeAgo = (ts) => {
   const diff = Date.now() - new Date(ts).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins} åéå`;
+  if (mins < 60) return `${mins} `;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs} å°æå`;
-  return `${Math.floor(hrs / 24)} å¤©å`;
+  if (hrs < 24) return `${hrs} `;
+  return `${Math.floor(hrs / 24)} å¤©`;
 };
 
-// âââ Custom Tooltip âââ
+//  Custom Tooltip 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -147,7 +147,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-// âââ Sidebar Nav Item âââ
+//  Sidebar Nav Item 
 const SidebarNavItem = ({ active, icon, label, onClick }) => (
   <button onClick={onClick} style={{
     display: "flex", alignItems: "center", gap: 12, width: "100%",
@@ -167,7 +167,7 @@ const SidebarNavItem = ({ active, icon, label, onClick }) => (
 
 
 
-// âââ Stat Card âââ
+//  Stat Card 
 const StatCard = ({ label, value, sub, icon, color }) => (
   <div style={{
     background: COLORS.white, borderRadius: 20, border: `1px solid ${COLORS.gray100}`,
@@ -189,7 +189,7 @@ const StatCard = ({ label, value, sub, icon, color }) => (
   </div>
 );
 
-// âââ Post Card âââ
+//  Post Card 
 const PostCard = ({ post }) => (
   <div style={{
     background: COLORS.white, borderRadius: 20, border: `1px solid ${COLORS.gray100}`,
@@ -251,15 +251,15 @@ const PostCard = ({ post }) => (
   </div>
 );
 
-// âââââââââââââââââââââââââââââââââââââââââââ
-// âââ MAIN APP âââ
-// âââââââââââââââââââââââââââââââââââââââââââ
+// 
+//  MAIN APP 
+// 
 export default function ThreadsDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [keywords, setKeywords] = useState(DEFAULT_KEYWORDS);
   const [posts, setPosts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedKeyword, setSelectedKeyword] = useState("å¨é¨");
+  const [selectedKeyword, setSelectedKeyword] = useState("");
   const [newKeyword, setNewKeyword] = useState("");
   const [newSort, setNewSort] = useState("recent");
   const [newMaxPages, setNewMaxPages] = useState(1);
@@ -276,7 +276,7 @@ export default function ThreadsDashboard() {
   const [showConfig, setShowConfig] = useState(false);
   const [confirmDeleteTarget, setConfirmDeleteTarget] = useState(null); // { id, keyword }
 
-  // âââ å²å­ Token å° LocalStorage âââ
+  //   Token  LocalStorage 
   useEffect(() => {
     if (apifyToken) {
       localStorage.setItem("APIFY_TOKEN", apifyToken);
@@ -285,8 +285,8 @@ export default function ThreadsDashboard() {
     }
   }, [apifyToken]);
 
-  // âââ API ä¸²æ¥çæ âââ
-  // æ¬å°éç¼ç¨ :3001ï¼çç¢ç°å¢åå¾ç«¯å port ç¨ç¸å°è·¯å¾
+  //  API ä¸² 
+  //  :3001ç«¯ port è·¯
   const API_BASE = window.location.hostname === "localhost" ? "http://localhost:3001" : "";
   const [scraping, setScraping] = useState(false);
   const [scrapeProgress, setScrapeProgress] = useState(null);
@@ -298,7 +298,7 @@ export default function ThreadsDashboard() {
   const [strictKeywordFilter, setStrictKeywordFilter] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(false);
 
-  // âââ ååæèªåæª¢æ¥å¾ç«¯çæ âââ
+  //  æª¢ç«¯ 
   const checkApiHealth = useCallback(async () => {
     setApiStatus(prev => ({ ...prev, server: "checking", db: "checking" }));
     try {
@@ -310,7 +310,7 @@ export default function ThreadsDashboard() {
         setApiStatus({ server: "offline", db: "offline", lastCheck: new Date().toLocaleTimeString(), error: `HTTP ${res.status}` });
       }
     } catch {
-      setApiStatus({ server: "offline", db: "offline", lastCheck: new Date().toLocaleTimeString(), error: "ç¡æ³é£ç·" });
+      setApiStatus({ server: "offline", db: "offline", lastCheck: new Date().toLocaleTimeString(), error: "" });
     }
   }, []);
 
@@ -328,7 +328,7 @@ export default function ThreadsDashboard() {
         }
       }
     } catch (err) {
-      console.error("ç¡æ³åå¾ééµå­:", err);
+      console.error(":", err);
     }
   }, []);
 
@@ -340,7 +340,7 @@ export default function ThreadsDashboard() {
         if (data.posts) setPosts(data.posts);
       }
     } catch (err) {
-      console.error("ç¡æ³åå¾è²¼æ:", err);
+      console.error("è²¼:", err);
     }
   }, []);
 
@@ -357,7 +357,7 @@ export default function ThreadsDashboard() {
         })));
       }
     } catch (err) {
-      console.error("ç¡æ³åå¾æåç´é:", err);
+      console.error(":", err);
     }
   }, []);
 
@@ -366,7 +366,7 @@ export default function ThreadsDashboard() {
     fetchKeywords();
     fetchPosts();
     fetchScrapeHistory();
-    // è¥æå·²å²å­ç tokenï¼èªåéé»é©è­
+    // å·² token
     const savedToken = localStorage.getItem("APIFY_TOKEN");
     if (savedToken) {
       fetch(`${API_BASE}/api/verify-token`, {
@@ -376,7 +376,7 @@ export default function ThreadsDashboard() {
       }).then(r => r.json()).then(data => {
         setTokenStatus(data);
         if (data.valid) {
-          // ä¹èªåè¼å¥é¡åº¦è³è¨
+          // åº¦
           fetch(`${API_BASE}/api/usage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -389,11 +389,11 @@ export default function ThreadsDashboard() {
     return () => clearInterval(interval);
   }, [checkApiHealth, fetchKeywords, fetchPosts, fetchScrapeHistory]);
 
-  // âââ å¾çå¯¦ posts è¨ç®è¶¨å¢è³æ âââ
+  //  å¯¦ posts è¶¨ 
   const trendData = (() => {
     if (!posts.length) return {};
     const data = {};
-    // æééµå­åçµï¼çµ±è¨æ¯æ¥çè²¼ææ¸èäºåé
+    // çµ±è²¼
     keywords.forEach(kw => {
       const kwPosts = posts.filter(p => p.keyword === kw.keyword);
       if (!kwPosts.length) return;
@@ -441,7 +441,7 @@ export default function ThreadsDashboard() {
 
   // Filtered + sorted posts
   const filteredPosts = posts.filter(p => {
-    const matchKw = selectedKeyword === "å¨é¨" || p.keyword === selectedKeyword;
+    const matchKw = selectedKeyword === "" || p.keyword === selectedKeyword;
     const matchSearch = !searchQuery || p.caption?.toLowerCase().includes(searchQuery.toLowerCase())
       || p.user?.username?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchKw && matchSearch;
@@ -454,8 +454,8 @@ export default function ThreadsDashboard() {
     }
   }).filter(p => {
     if (!p.caption || !p.caption.trim()) return false;
-    if (strictKeywordFilter && selectedKeyword !== "å¨é¨") {
-      // ä¸åå¤§å°å¯«çç²¾ç¢ºç¬¦å
+    if (strictKeywordFilter && selectedKeyword !== "") {
+      // å¤§å¯«ç²¾ç¢ºç¬¦
       return p.caption.toLowerCase().includes(selectedKeyword.toLowerCase());
     }
     return true;
@@ -470,8 +470,8 @@ export default function ThreadsDashboard() {
         body: JSON.stringify({ keyword: selectedKeyword }),
       });
       if (res.ok) {
-        // å¾ state ç§»é¤å·²å°å­è²¼æ
-        if (selectedKeyword === "å¨é¨") {
+        //  state ç§»å·²è²¼
+        if (selectedKeyword === "") {
           setPosts([]);
         } else {
           setPosts(prev => prev.filter(p => p.keyword !== selectedKeyword));
@@ -479,7 +479,7 @@ export default function ThreadsDashboard() {
         await fetchScrapeHistory();
       }
     } catch (err) {
-      alert("æ¸é¤å¤±æ");
+      alert("å¤±");
     }
     setConfirmArchive(false);
   };
@@ -514,13 +514,13 @@ export default function ThreadsDashboard() {
           }]);
         }
         setNewKeyword("");
-        setShowAddForm(false); // æåæéé
+        setShowAddForm(false); // 
       } else {
         const err = await res.json();
-        setAddKeywordError(err.error || "æ°å¢å¤±æ"); // è¡å§é¡¯ç¤ºé¯èª¤ï¼ä¸ééè¡¨å®
+        setAddKeywordError(err.error || "å¤±"); // é¡¯ç¤ºèª¤è¡¨
       }
     } catch (err) {
-      setAddKeywordError("ç¡æ³é£æ¥ä¼ºæå¨ï¼è«ç¢ºèªå¾ç«¯çæ");
+      setAddKeywordError("ä¼ºç¢ºç«¯");
     }
   };
 
@@ -530,7 +530,7 @@ export default function ThreadsDashboard() {
       await fetch(`${API_BASE}/api/keywords/${id}`, { method: "DELETE" });
       setKeywords(prev => prev.filter(k => k.id !== id));
     } catch (err) {
-      alert("åªé¤å¤±æ");
+      alert("å¤±");
     }
   };
 
@@ -547,15 +547,15 @@ export default function ThreadsDashboard() {
         setKeywords(prev => prev.map(k => k.id === editingId ? { ...k, ...editForm, scheduleTime: editForm.schedule_time, scheduleEnabled: editForm.schedule_enabled, maxPages: editForm.max_pages, sort: editForm.sort_option } : k));
       } else {
         const err = await res.json();
-        alert(err.error || "å²å­å¤±æ");
+        alert(err.error || "å¤±");
       }
     } catch (err) {
-      alert("å²å­å¤±æ");
+      alert("å¤±");
     }
     setEditingId(null);
   };
 
-  // âââ é©è­ Apify Token âââ
+  //   Apify Token 
   const verifyToken = async () => {
     if (!apifyToken.trim()) return;
     setTokenStatus("checking");
@@ -567,14 +567,14 @@ export default function ThreadsDashboard() {
       });
       const data = await res.json();
       setTokenStatus(data);
-      // é©è­æåå¾èªåè¼å¥é¡åº¦è³è¨
+      // åº¦
       if (data.valid) fetchUsage();
     } catch {
-      setTokenStatus({ valid: false, error: "ç¡æ³é£æ¥ API Serverï¼è«ç¢ºèªå¾ç«¯å·²åå (npm run server)" });
+      setTokenStatus({ valid: false, error: " API Serverç¢ºç«¯å·² (npm run server)" });
     }
   };
 
-  // âââ Apify é¡åº¦ä½¿ç¨é âââ
+  //  Apify åº¦ä½¿ 
   const [usageData, setUsageData] = useState(null); // { account, usage, limits, recentRuns }
   const [usageLoading, setUsageLoading] = useState(false);
 
@@ -596,10 +596,10 @@ export default function ThreadsDashboard() {
     }
   };
 
-  // âââ å®ä¸ééµå­æå âââ
+  //   
   const scrapeSingle = async (kw) => {
     if (!apifyToken.trim()) {
-      alert("è«åå¨ãè¨­å®ãéé¢å¡«å¥ Apify API Token");
+      alert("è¨­å¡« Apify API Token");
       return;
     }
     setScrapingSingle(kw.id);
@@ -653,15 +653,15 @@ export default function ThreadsDashboard() {
     }
   };
 
-  // âââ æ¹æ¬¡æåææåç¨çééµå­ âââ
+  //  æ¬¡ 
   const scrapeAll = async () => {
     if (!apifyToken.trim()) {
-      alert("è«åå¨ãè¨­å®ãéé¢å¡«å¥ Apify API Token");
+      alert("è¨­å¡« Apify API Token");
       return;
     }
     const enabledKeywords = keywords.filter(k => k.enabled);
     if (!enabledKeywords.length) {
-      alert("æ²æåç¨çééµå­");
+      alert("");
       return;
     }
 
@@ -721,7 +721,7 @@ export default function ThreadsDashboard() {
         }
       }
     } catch (err) {
-      alert(`æ¹æ¬¡æåå¤±æ: ${err.message}`);
+      alert(`æ¬¡å¤±: ${err.message}`);
     } finally {
       setScraping(false);
       setScrapeProgress(null);
@@ -733,17 +733,17 @@ export default function ThreadsDashboard() {
 
   // Engagement pie data
   const engagementData = [
-    { name: "è®", value: posts.reduce((s, p) => s + p.like_count, 0), color: "#ef4444" },
-    { name: "çè¨", value: posts.reduce((s, p) => s + p.comment_count, 0), color: "#3B82F6" },
-    { name: "è½ç¼", value: posts.reduce((s, p) => s + p.repost_count, 0), color: COLORS.orange500 },
-    { name: "å¼ç¨", value: posts.reduce((s, p) => s + p.quote_count, 0), color: COLORS.emerald },
+    { name: "", value: posts.reduce((s, p) => s + p.like_count, 0), color: "#ef4444" },
+    { name: "", value: posts.reduce((s, p) => s + p.comment_count, 0), color: "#3B82F6" },
+    { name: "", value: posts.reduce((s, p) => s + p.repost_count, 0), color: COLORS.orange500 },
+    { name: "", value: posts.reduce((s, p) => s + p.quote_count, 0), color: COLORS.emerald },
   ];
 
   const enabledCount = keywords.filter(k => k.enabled).length;
   const totalPosts = posts.length;
   const totalEngagement = posts.reduce((s, p) => s + p.like_count + p.comment_count + p.repost_count, 0);
 
-  // âââ Render âââ
+  //  Render 
   return (
     <div style={{
       minHeight: "100vh",
@@ -751,7 +751,7 @@ export default function ThreadsDashboard() {
       fontFamily: "'Inter','Noto Sans TC',system-ui,-apple-system,sans-serif",
       display: "flex",
     }}>
-      {/* âââ åªé¤ç¢ºèª Modal âââ */}
+      {/*  ç¢º Modal  */}
       {confirmDeleteTarget && (
         <div style={{
           position: "fixed", inset: 0, zIndex: 1000,
@@ -763,13 +763,13 @@ export default function ThreadsDashboard() {
             width: 360, boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
             textAlign: "center",
           }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>ðï¸</div>
+            <div style={{ fontSize: 32, marginBottom: 12 }}></div>
             <div style={{ fontSize: 16, fontWeight: 800, color: COLORS.gray900, marginBottom: 8 }}>
-              åªé¤ééµå­
+              
             </div>
             <div style={{ fontSize: 14, color: COLORS.gray500, marginBottom: 24 }}>
-              ç¢ºå®è¦åªé¤ã<strong style={{ color: COLORS.gray900 }}>{confirmDeleteTarget.keyword}</strong>ãåï¼<br />
-              <span style={{ fontSize: 12, color: COLORS.red }}>æ­¤æä½ç¡æ³å¾©å</span>
+              ç¢º<strong style={{ color: COLORS.gray900 }}>{confirmDeleteTarget.keyword}</strong><br />
+              <span style={{ fontSize: 12, color: COLORS.red }}>æ­¤å¾©</span>
             </div>
             <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
               <button
@@ -780,7 +780,7 @@ export default function ThreadsDashboard() {
                   cursor: "pointer",
                 }}
               >
-                åæ¶
+                
               </button>
               <button
                 onClick={() => { deleteKeyword(confirmDeleteTarget.id); setConfirmDeleteTarget(null); }}
@@ -790,13 +790,13 @@ export default function ThreadsDashboard() {
                   cursor: "pointer", boxShadow: "0 2px 8px rgba(248,113,113,0.4)",
                 }}
               >
-                ç¢ºèªåªé¤
+                ç¢º
               </button>
             </div>
           </div>
         </div>
       )}
-      {/* âââ Archive ç¢ºèª Modal âââ */}
+      {/*  Archive ç¢º Modal  */}
       {confirmArchive && (
         <div style={{
           position: "fixed", inset: 0, zIndex: 1000,
@@ -808,40 +808,40 @@ export default function ThreadsDashboard() {
             width: 380, boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
             textAlign: "center",
           }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>ðï¸</div>
+            <div style={{ fontSize: 32, marginBottom: 12 }}></div>
             <div style={{ fontSize: 16, fontWeight: 800, color: COLORS.gray900, marginBottom: 8 }}>
-              æ¸é¤è²¼æ
+              è²¼
             </div>
             <div style={{ fontSize: 14, color: COLORS.gray500, marginBottom: 24 }}>
-              ç¢ºå®è¦å°å­
+              ç¢º
               <strong style={{ color: COLORS.gray900 }}>
-                {selectedKeyword === "å¨é¨" ? "ææ" : `ã${selectedKeyword}ã`}
+                {selectedKeyword === "" ? "" : `${selectedKeyword}`}
               </strong>
-              ç {filteredPosts.length} åè²¼æåï¼<br />
-              <span style={{ fontSize: 12, color: COLORS.gray400 }}>è³ææä¿çå¨è³æåº«ï¼ä¸æè¢«åªé¤</span>
+               {filteredPosts.length} è²¼<br />
+              <span style={{ fontSize: 12, color: COLORS.gray400 }}>åº«è¢«</span>
             </div>
             <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
               <button onClick={() => setConfirmArchive(false)} style={{
                 padding: "10px 24px", borderRadius: 50, border: `1px solid ${COLORS.gray200}`,
                 background: COLORS.white, color: COLORS.gray500, fontWeight: 600, fontSize: 14, cursor: "pointer",
-              }}>åæ¶</button>
+              }}></button>
               <button onClick={archiveAll} style={{
                 padding: "10px 24px", borderRadius: 50, border: "none",
                 background: "#6366f1", color: COLORS.white, fontWeight: 700, fontSize: 14,
                 cursor: "pointer", boxShadow: "0 2px 8px rgba(99,102,241,0.4)",
-              }}>ç¢ºèªå°å­</button>
+              }}>ç¢º</button>
             </div>
           </div>
         </div>
       )}
-      {/* âââ Left Sidebar âââ */}
+      {/*  Left Sidebar  */}
       <aside style={{
         width: 230, minWidth: 230, height: "100vh", position: "sticky", top: 0,
         background: COLORS.white, borderRight: `1px solid ${COLORS.gray100}`,
         display: "flex", flexDirection: "column", padding: "20px 14px",
         boxSizing: "border-box", zIndex: 50,
       }}>
-        {/* Logo â GMB style */}
+        {/* Logo  GMB style */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 32, padding: "0 4px" }}>
           <div style={{
             fontSize: 13, fontWeight: 800, color: COLORS.gray900,
@@ -858,23 +858,23 @@ export default function ThreadsDashboard() {
         <nav style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
           {[
             { key: "dashboard", label: "ç¸½è¦½", icon: <Icons.TrendUp /> },
-            { key: "posts", label: "è²¼æ", icon: <Icons.Comment /> },
-            { key: "keywords", label: "ééµå­", icon: <Icons.Search /> },
-            { key: "settings", label: "è¨­å®", icon: <Icons.Settings /> },
+            { key: "posts", label: "è²¼", icon: <Icons.Comment /> },
+            { key: "keywords", label: "", icon: <Icons.Search /> },
+            { key: "settings", label: "è¨­", icon: <Icons.Settings /> },
           ].map(t => (
             <SidebarNavItem key={t.key} active={activeTab === t.key} icon={t.icon} label={t.label}
               onClick={() => setActiveTab(t.key)} />
           ))}
         </nav>
 
-        {/* Apify é¡åº¦æè¦ */}
+        {/* Apify åº¦ */}
         {usageData && (
           <div style={{
             padding: "12px 14px", borderRadius: 12,
             background: COLORS.gray50, marginBottom: 8,
           }}>
             <div style={{ fontSize: 10, color: COLORS.gray400, fontWeight: 600, letterSpacing: "0.05em", marginBottom: 6, textTransform: "uppercase" }}>
-              Apify é¡åº¦
+              Apify åº¦
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
               <span style={{ fontSize: 14, fontWeight: 800, color: COLORS.orange500 }}>
@@ -894,7 +894,7 @@ export default function ThreadsDashboard() {
               }} />
             </div>
             <div style={{ fontSize: 10, color: COLORS.gray400 }}>
-              å·²ä½¿ç¨ {((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100).toFixed(1)}%
+              å·²ä½¿ {((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100).toFixed(1)}%
             </div>
           </div>
         )}
@@ -909,31 +909,31 @@ export default function ThreadsDashboard() {
             background: enabledCount > 0 ? COLORS.emerald : COLORS.gray300,
           }} />
           <span style={{ fontSize: 12, color: COLORS.gray500 }}>
-            {enabledCount} çµééµå­ç£æ§ä¸­
+            {enabledCount} ä¸­
           </span>
         </div>
       </aside>
 
-      {/* âââ Main Content âââ */}
+      {/*  Main Content  */}
       <main style={{ flex: 1, padding: "28px 32px 80px", minWidth: 0, overflowY: "auto", maxHeight: "100vh" }}>
 
-        {/* âââ DASHBOARD TAB âââ */}
+        {/*  DASHBOARD TAB  */}
         {activeTab === "dashboard" && (
           <div>
             {/* Stats Row */}
             <div style={{ display: "flex", gap: 16, marginBottom: 24, flexWrap: "wrap" }}>
-              <StatCard label="è¿½è¹¤ééµå­" value={enabledCount} sub={`å± ${keywords.length} çµ`}
+              <StatCard label="è¿½è¹¤" value={enabledCount} sub={` ${keywords.length} `}
                 icon={<Icons.Search />} color={COLORS.orange500} />
-              <StatCard label="å·²æ¶éè²¼æ" value={totalPosts} sub={totalPosts === 0 ? "å°æªæå" : `${[...new Set(posts.map(p => p.keyword))].length} çµééµå­`}
+              <StatCard label="å·²è²¼" value={totalPosts} sub={totalPosts === 0 ? "" : `${[...new Set(posts.map(p => p.keyword))].length} `}
                 icon={<Icons.Database />} />
-              <StatCard label="ç¸½äºåé" value={formatNum(totalEngagement)} sub={totalPosts === 0 ? "---" : `${totalPosts} åè²¼æ`}
+              <StatCard label="ç¸½" value={formatNum(totalEngagement)} sub={totalPosts === 0 ? "---" : `${totalPosts} è²¼`}
                 icon={<Icons.TrendUp />} color={COLORS.orange500} />
             </div>
 
             {/* Scrape Log */}
             {scrapeLog.length > 0 && (
               <div style={{ background: COLORS.white, borderRadius: 12, border: `1px solid ${COLORS.gray100}`, padding: 14, marginBottom: 24 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.gray900, marginBottom: 8 }}>è¿æç³»çµ±æåè»è·¡</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.gray900, marginBottom: 8 }}>ç³»çµ±è·¡</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   {scrapeLog.map((log, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, padding: "4px 0" }}>
@@ -943,7 +943,7 @@ export default function ThreadsDashboard() {
                         }} />
                         <span style={{ fontWeight: 600, color: COLORS.gray900 }}>{log.keyword}</span>
                         <span style={{ color: log.status === "success" ? COLORS.emerald : COLORS.red }}>
-                          {log.status === "success" ? `${log.postCount} åè²¼æ` : log.error || "å¤±æ"}
+                          {log.status === "success" ? `${log.postCount} è²¼` : log.error || "å¤±"}
                         </span>
                         <span style={{ color: COLORS.gray400, marginLeft: "auto" }}>{log.time}</span>
                       </div>
@@ -960,10 +960,10 @@ export default function ThreadsDashboard() {
                 padding: "20px 24px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
               }}>
                 <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>
-                  ééµå­æåè¶¨å¢
+                  è¶¨
                 </div>
                 <div style={{ fontSize: 12, color: COLORS.gray400, marginBottom: 16 }}>
-                  {posts.length > 0 ? "ä¾æå·²æåè³æ" : "å°ç¡è³æ"}
+                  {posts.length > 0 ? "å·²" : ""}
                 </div>
                 {posts.length === 0 ? (
                   <div style={{
@@ -971,8 +971,8 @@ export default function ThreadsDashboard() {
                     justifyContent: "center", color: COLORS.gray400, gap: 12,
                   }}>
                     <Icons.Database />
-                    <div style={{ fontSize: 14, fontWeight: 600 }}>å°ç¡è¶¨å¢è³æ</div>
-                    <div style={{ fontSize: 12 }}>è«åè¨­å® Apify Token ä¸¦å·è¡ééµå­æå</div>
+                    <div style={{ fontSize: 14, fontWeight: 600 }}>è¶¨</div>
+                    <div style={{ fontSize: 12 }}>è¨­ Apify Token ä¸¦</div>
                   </div>
                 ) : (
                 <>
@@ -1016,9 +1016,9 @@ export default function ThreadsDashboard() {
                 padding: "20px 24px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
               }}>
                 <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>
-                  äºåé¡ååä½
+                  
                 </div>
-                <div style={{ fontSize: 12, color: COLORS.gray400, marginBottom: 8 }}>ææå·²æ¶éè²¼æ</div>
+                <div style={{ fontSize: 12, color: COLORS.gray400, marginBottom: 8 }}>å·²è²¼</div>
                 <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
                     <Pie data={engagementData} cx="50%" cy="50%" innerRadius={50} outerRadius={80}
@@ -1045,12 +1045,12 @@ export default function ThreadsDashboard() {
               padding: "20px 24px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 16 }}>
-                ç±éè²¼æ TOP 10
+                è²¼ TOP 10
               </div>
               {posts.length === 0 ? (
                 <div style={{ padding: "40px 0", textAlign: "center", color: COLORS.gray400 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600 }}>å°ç¡è²¼æè³æ</div>
-                  <div style={{ fontSize: 12, marginTop: 4 }}>å·è¡æåå¾å°èªåé¡¯ç¤º</div>
+                  <div style={{ fontSize: 14, fontWeight: 600 }}>è²¼</div>
+                  <div style={{ fontSize: 12, marginTop: 4 }}>é¡¯ç¤º</div>
                 </div>
               ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -1089,7 +1089,7 @@ export default function ThreadsDashboard() {
           </div>
         )}
 
-        {/* âââ POSTS TAB âââ */}
+        {/*  POSTS TAB  */}
         {activeTab === "posts" && (
           <div>
             {/* Search + Filter */}
@@ -1100,7 +1100,7 @@ export default function ThreadsDashboard() {
                 </div>
                 <input
                   value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="æå°è²¼æå§å®¹æç¨æ¶å..."
+                  placeholder="è²¼å®¹..."
                   style={{
                     width: "100%", padding: "12px 16px 12px 44px", borderRadius: 50, fontSize: 14,
                     border: `1px solid ${COLORS.gray200}`, background: "rgba(249,250,251,0.8)",
@@ -1111,7 +1111,7 @@ export default function ThreadsDashboard() {
                 />
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {["å¨é¨", ...keywords.map(k => k.keyword)].map(kw => (
+                {["", ...keywords.map(k => k.keyword)].map(kw => (
                   <button key={kw} onClick={() => setSelectedKeyword(kw)} style={{
                     padding: "10px 18px", borderRadius: 50, fontSize: 13, fontWeight: 600,
                     border: selectedKeyword === kw ? `2px solid ${COLORS.orange500}` : `1px solid ${COLORS.gray200}`,
@@ -1125,13 +1125,13 @@ export default function ThreadsDashboard() {
               </div>
             </div>
 
-            {/* Post count + æ¸é¤ + æåº */}
+            {/* Post count +  +  */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ fontSize: 13, color: COLORS.gray400 }}>
-                  å± {filteredPosts.length} åè²¼æ
-                  {strictKeywordFilter && selectedKeyword !== "å¨é¨" && (
-                    <span style={{ marginLeft: 6, fontSize: 11, color: COLORS.orange500, fontWeight: 600 }}>ï¼ç²¾ç¢ºç¬¦åï¼</span>
+                   {filteredPosts.length} è²¼
+                  {strictKeywordFilter && selectedKeyword !== "" && (
+                    <span style={{ marginLeft: 6, fontSize: 11, color: COLORS.orange500, fontWeight: 600 }}>ç²¾ç¢ºç¬¦</span>
                   )}
                 </div>
                 {filteredPosts.length > 0 && (
@@ -1143,16 +1143,16 @@ export default function ThreadsDashboard() {
                     onMouseEnter={e => { e.currentTarget.style.color = "#6366f1"; e.currentTarget.style.borderColor = "#6366f1"; }}
                     onMouseLeave={e => { e.currentTarget.style.color = COLORS.gray400; e.currentTarget.style.borderColor = COLORS.gray200; }}
                   >
-                    ðï¸ æ¸é¤ææ
+                     
                   </button>
                 )}
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {[
-                  { key: "newest",  label: "ææ°" },
-                  { key: "likes",   label: "ð¤ æè®æå¤" },
-                  { key: "replies", label: "ð¬ åè¦æå¤" },
-                  { key: "reposts", label: "ð è½ç¼æå¤" },
+                  { key: "newest",  label: "" },
+                  { key: "likes",   label: " " },
+                  { key: "replies", label: " " },
+                  { key: "reposts", label: " " },
                 ].map(({ key, label }) => (
                   <button key={key} onClick={() => setPostSort(key)} style={{
                     padding: "5px 12px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
@@ -1164,7 +1164,7 @@ export default function ThreadsDashboard() {
                     {label}
                   </button>
                 ))}
-                {selectedKeyword !== "å¨é¨" && (
+                {selectedKeyword !== "" && (
                   <button onClick={() => setStrictKeywordFilter(v => !v)} style={{
                     padding: "5px 12px", borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: "pointer",
                     border: strictKeywordFilter ? "none" : `1px solid ${COLORS.gray200}`,
@@ -1172,7 +1172,7 @@ export default function ThreadsDashboard() {
                     color: strictKeywordFilter ? COLORS.white : COLORS.gray500,
                     transition: "all 0.15s",
                   }}>
-                    ð¯ ç²¾ç¢ºç¬¦å
+                     ç²¾ç¢ºç¬¦
                   </button>
                 )}
               </div>
@@ -1186,12 +1186,12 @@ export default function ThreadsDashboard() {
                 <div style={{ textAlign: "center", padding: 60, color: COLORS.gray400 }}>
                   <div style={{ marginBottom: 12, color: COLORS.gray300 }}><Icons.Search /></div>
                   <div style={{ fontSize: 15, fontWeight: 600 }}>
-                    {posts.length === 0 ? "å°ç¡è²¼æè³æ" : "æ²æç¬¦åæ¢ä»¶çè²¼æ"}
+                    {posts.length === 0 ? "è²¼" : "ç¬¦ä»¶è²¼"}
                   </div>
                   <div style={{ fontSize: 13, marginTop: 6 }}>
                     {posts.length === 0
-                      ? "è«ç¢ºä¿å·²è¨­å® Apify Tokenï¼ä¸¦è³ãééµå­ãåéå·è¡æåæåæç­å¾èªåæç¨"
-                      : "è©¦è©¦èª¿æ´æå°æ¢ä»¶æééµå­ç¯©é¸"
+                      ? "ç¢ºå·²è¨­ Apify Tokenä¸¦"
+                      : "è©¦è©¦èª¿ä»¶ç¯©"
                     }
                   </div>
                 </div>
@@ -1200,13 +1200,13 @@ export default function ThreadsDashboard() {
           </div>
         )}
 
-        {/* âââ KEYWORDS TAB âââ */}
+        {/*  KEYWORDS TAB  */}
         {activeTab === "keywords" && (
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.orange500 }}>ééµå­ç®¡ç</div>
-                <div style={{ fontSize: 13, color: COLORS.gray400, marginTop: 4 }}>ç®¡çä½ç Threads è¿½è¹¤ééµå­ï¼Apify Actor å°ææç¨æå</div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.orange500 }}>ç®¡</div>
+                <div style={{ fontSize: 13, color: COLORS.gray400, marginTop: 4 }}>ç®¡ Threads è¿½è¹¤Apify Actor </div>
               </div>
               <button onClick={() => setShowAddForm(!showAddForm)} style={{
                 display: "flex", alignItems: "center", gap: 6, padding: "10px 22px",
@@ -1214,7 +1214,7 @@ export default function ThreadsDashboard() {
                 background: COLORS.orange500, color: COLORS.white, transition: "all 0.2s",
                 boxShadow: "0 2px 8px rgba(255,107,44,0.25)",
               }}>
-                <Icons.Plus /> æ°å¢ééµå­
+                <Icons.Plus /> 
               </button>
             </div>
 
@@ -1224,14 +1224,14 @@ export default function ThreadsDashboard() {
                 background: COLORS.white, borderRadius: 20, border: `2px solid ${COLORS.orange200}`,
                 padding: 24, marginBottom: 20, boxShadow: "0 4px 20px rgba(255,107,44,0.08)",
               }}>
-                <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 16 }}>æ°å¢è¿½è¹¤ééµå­</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 16 }}>è¿½è¹¤</div>
                 <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-end" }}>
                   <div style={{ flex: 2, minWidth: 200 }}>
                     <label style={{ fontSize: 12, fontWeight: 600, color: COLORS.gray500, marginBottom: 6, display: "block" }}>
-                      ééµå­ / Hashtag
+                       / Hashtag
                     </label>
                     <input value={newKeyword} onChange={e => setNewKeyword(e.target.value)}
-                      placeholder='ä¾ï¼AI, #å°ç£, "machine learning"'
+                      placeholder='AI, #, "machine learning"'
                       style={{
                         width: "100%", padding: "12px 18px", borderRadius: 50, fontSize: 14,
                         border: `1px solid ${COLORS.gray200}`, background: "rgba(249,250,251,0.8)",
@@ -1243,19 +1243,19 @@ export default function ThreadsDashboard() {
                     />
                   </div>
                   <div style={{ minWidth: 120 }}>
-                    <label style={{ fontSize: 12, fontWeight: 600, color: COLORS.gray500, marginBottom: 6, display: "block" }}>æåº</label>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: COLORS.gray500, marginBottom: 6, display: "block" }}></label>
                     <select value={newSort} onChange={e => setNewSort(e.target.value)} style={{
                       width: "100%", padding: "12px 18px", borderRadius: 50, fontSize: 14,
                       border: `1px solid ${COLORS.gray200}`, background: "rgba(249,250,251,0.8)",
                       outline: "none", cursor: "pointer",
                     }}>
-                      <option value="recent">ææ° (Recent)</option>
-                      <option value="top">ç±é (Top)</option>
+                      <option value="recent"> (Recent)</option>
+                      <option value="top"> (Top)</option>
                     </select>
                   </div>
                   <div style={{ minWidth: 100 }}>
                     <label style={{ fontSize: 12, fontWeight: 600, color: COLORS.gray500, marginBottom: 6, display: "block" }}>
-                      æåæ·±åº¦ (é) <span title="1éç´=20ç¯æãæ¸å­è¶å¤§æè¶ä¹">(?)</span>
+                      æ·±åº¦ () <span title="1=20å¤§">(?)</span>
                     </label>
                     <input type="number" min={1} max={20} value={newMaxPages}
                       onChange={e => setNewMaxPages(parseInt(e.target.value) || 5)}
@@ -1268,7 +1268,7 @@ export default function ThreadsDashboard() {
                   </div>
                   <div style={{ minWidth: 120 }}>
                     <label style={{ fontSize: 12, fontWeight: 600, color: COLORS.gray500, marginBottom: 6, display: "block" }}>
-                      æ¯æ¥æç¨æé
+                      
                     </label>
                     <input type="time" value={newScheduleTime} onChange={e => setNewScheduleTime(e.target.value)}
                       style={{
@@ -1278,7 +1278,7 @@ export default function ThreadsDashboard() {
                       }}
                     />
                   </div>
-                  {/* æç¨éé */}
+                  {/*  */}
                   <div style={{ minWidth: 100, display: "flex", flexDirection: "column", justifyContent: "flex-end", paddingBottom: 4 }}>
                     <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", userSelect: "none" }}>
                       <div
@@ -1296,7 +1296,7 @@ export default function ThreadsDashboard() {
                         }} />
                       </div>
                       <span style={{ fontSize: 12, fontWeight: 600, color: newScheduleEnabled ? COLORS.orange500 : COLORS.gray400 }}>
-                        æ¯æ¥æç¨
+                        
                       </span>
                     </label>
                   </div>
@@ -1305,18 +1305,18 @@ export default function ThreadsDashboard() {
                       padding: "12px 28px", borderRadius: 50, border: "none", cursor: "pointer",
                       background: COLORS.orange500, color: COLORS.white, fontWeight: 600, fontSize: 14,
                     }}>
-                      æ°å¢
+                      
                     </button>
                     <button onClick={() => { setShowAddForm(false); setAddKeywordError(""); }} style={{
                       padding: "12px 22px", borderRadius: 50, border: `1px solid ${COLORS.gray200}`,
                       background: COLORS.white, color: COLORS.gray500, fontWeight: 600, fontSize: 14, cursor: "pointer",
                     }}>
-                      åæ¶
+                      
                     </button>
                   </div>
                   {addKeywordError && (
                     <div style={{ width: "100%", marginTop: 8, fontSize: 13, color: COLORS.red, fontWeight: 600 }}>
-                      âï¸ {addKeywordError}
+                       {addKeywordError}
                     </div>
                   )}
                 </div>
@@ -1347,14 +1347,14 @@ export default function ThreadsDashboard() {
                         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                           <input value={editForm.keyword} onChange={e => setEditForm({...editForm, keyword: e.target.value})} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${COLORS.gray200}`, fontSize: 13 }} />
                           <select value={editForm.sort_option} onChange={e => setEditForm({...editForm, sort_option: e.target.value})} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${COLORS.gray200}`, fontSize: 13 }}>
-                            <option value="recent">ææ°</option>
-                            <option value="top">ç±é</option>
+                            <option value="recent"></option>
+                            <option value="top"></option>
                           </select>
-                          <span style={{ fontSize: 12, color: COLORS.gray500 }}>æ·±åº¦ (ç´ {editForm.max_pages * 15} ç­)</span>
+                          <span style={{ fontSize: 12, color: COLORS.gray500 }}>æ·±åº¦ ( {editForm.max_pages * 15} )</span>
                           <input type="number" min={1} max={20} value={editForm.max_pages} onChange={e => setEditForm({...editForm, max_pages: parseInt(e.target.value) || 1})} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${COLORS.gray200}`, fontSize: 13, width: 50 }} />
-                          <span style={{ fontSize: 12, color: COLORS.gray500 }}>æç¨</span>
+                          <span style={{ fontSize: 12, color: COLORS.gray500 }}></span>
                           <input type="time" value={editForm.schedule_time} onChange={e => setEditForm({...editForm, schedule_time: e.target.value})} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${COLORS.gray200}`, fontSize: 13 }} />
-                          {/* æç¨éé */}
+                          {/*  */}
                           <div
                             onClick={() => setEditForm({...editForm, schedule_enabled: !editForm.schedule_enabled})}
                             style={{
@@ -1370,17 +1370,17 @@ export default function ThreadsDashboard() {
                             }} />
                           </div>
                           <span style={{ fontSize: 12, color: editForm.schedule_enabled ? COLORS.orange500 : COLORS.gray400, fontWeight: 600 }}>
-                            {editForm.schedule_enabled ? "æç¨éå" : "æç¨éé"}
+                            {editForm.schedule_enabled ? "" : ""}
                           </span>
                         </div>
                       ) : (
                         <>
                           <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.gray900 }}>{k.keyword}</div>
                           <div style={{ fontSize: 13, color: COLORS.gray400, marginTop: 2 }}>
-                            æåº: {k.sort === "recent" ? "ææ°" : "ç±é"} Â· æåæ·±åº¦: {k.maxPages} é (ç´ {k.maxPages * 15} ç­) Â· å»ºç«: {k.createdAt}
+                            : {k.sort === "recent" ? "" : ""} Â· æ·±åº¦: {k.maxPages}  ( {k.maxPages * 15} ) Â· å»º: {k.createdAt}
                             {k.scheduleEnabled && (
                               <span style={{ marginLeft: 6, color: COLORS.orange500 }}>
-                                Â· ð {k.scheduleTime || "09:00"}ï¼æç¨ä¸­ï¼
+                                Â·  {k.scheduleTime || "09:00"}ä¸­
                               </span>
                             )}
                           </div>
@@ -1392,10 +1392,10 @@ export default function ThreadsDashboard() {
                     {editingId === k.id ? (
                       <>
                         <button onClick={saveEditKeyword} style={{ background: COLORS.emerald, color: COLORS.white, padding: "8px 16px", borderRadius: 50, border: "none", cursor: "pointer", fontWeight: 600, fontSize: 13 }}>
-                          <span style={{ display: "flex", gap: 6, alignItems: "center" }}><Icons.Check /> å²å­</span>
+                          <span style={{ display: "flex", gap: 6, alignItems: "center" }}><Icons.Check /> </span>
                         </button>
                         <button onClick={() => setEditingId(null)} style={{ background: COLORS.white, color: COLORS.gray500, border: `1px solid ${COLORS.gray200}`, padding: "8px 16px", borderRadius: 50, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>
-                          åæ¶
+                          
                         </button>
                       </>
                     ) : (
@@ -1410,7 +1410,7 @@ export default function ThreadsDashboard() {
                             opacity: !apifyToken.trim() ? 0.4 : 1,
                             position: "relative",
                           }}>
-                            {/* é²åº¦æ¢åºè² */}
+                            {/* åº¦ */}
                             {scrapingSingle === k.id && (
                               <div style={{
                                 position: "absolute", top: 0, left: 0, bottom: 0,
@@ -1420,9 +1420,9 @@ export default function ThreadsDashboard() {
                                 zIndex: 0,
                               }} />
                             )}
-                            {/* æå­èå¨æä¸å±¤ */}
+                            {/* å±¤ */}
                             <span style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-                              {scrapingSingle === k.id ? `æåä¸­ ${Math.round(scrapeSingleProgress[k.id] || 0)}%` : "éå§æå"}
+                              {scrapingSingle === k.id ? `ä¸­ ${Math.round(scrapeSingleProgress[k.id] || 0)}%` : ""}
                             </span>
                           </button>
                         </div>
@@ -1453,32 +1453,32 @@ export default function ThreadsDashboard() {
           </div>
         )}
 
-        {/* âââ SETTINGS TAB âââ */}
+        {/*  SETTINGS TAB  */}
         {activeTab === "settings" && (
           <div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.orange500, marginBottom: 20 }}>ç³»çµ±è¨­å®</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.orange500, marginBottom: 20 }}>ç³»çµ±è¨­</div>
 
-            {/* API ä¸²æ¥çæé¢æ¿ */}
+            {/* API ä¸² */}
             <div style={{
               background: COLORS.white, borderRadius: 20, border: `1px solid ${COLORS.gray100}`,
               padding: 24, marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                 <div>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>API ä¸²æ¥çæ</div>
-                  <div style={{ fontSize: 13, color: COLORS.gray400 }}>å³æç£æ§ç³»çµ±åéæåçé£ç·çæ</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>API ä¸²</div>
+                  <div style={{ fontSize: 13, color: COLORS.gray400 }}>ç³»çµ±</div>
                 </div>
                 <button onClick={checkApiHealth} style={{
                   padding: "8px 18px", borderRadius: 50, border: `1px solid ${COLORS.gray200}`,
                   background: COLORS.white, color: COLORS.gray500, fontSize: 12, fontWeight: 600,
                   cursor: "pointer", transition: "all 0.2s",
                 }}>
-                  éæ°æª¢æ¥
+                  æª¢
                 </button>
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
-                {/* å¾ç«¯ä¼ºæå¨ */}
+                {/* ç«¯ä¼º */}
                 <div style={{
                   background: apiStatus.server === "online" ? "#F0FDF4" : apiStatus.server === "checking" ? COLORS.gray50 : "#FEF2F2",
                   border: `1px solid ${apiStatus.server === "online" ? "#BBF7D0" : apiStatus.server === "checking" ? COLORS.gray200 : "#FECACA"}`,
@@ -1491,19 +1491,19 @@ export default function ThreadsDashboard() {
                       boxShadow: apiStatus.server === "online" ? `0 0 6px ${COLORS.emerald}` : "none",
                       animation: apiStatus.server === "checking" ? "pulse 1.5s ease-in-out infinite" : "none",
                     }} />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.gray900 }}>å¾ç«¯ä¼ºæå¨</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.gray900 }}>ç«¯ä¼º</span>
                   </div>
                   <div style={{
                     fontSize: 14, fontWeight: 800, marginBottom: 4,
                     color: apiStatus.server === "online" ? COLORS.emerald : apiStatus.server === "checking" ? COLORS.gray400 : COLORS.red,
                   }}>
-                    {apiStatus.server === "online" ? "å·²é£ç·" : apiStatus.server === "checking" ? "æª¢æ¥ä¸­..." : "é¢ç·"}
+                    {apiStatus.server === "online" ? "å·²" : apiStatus.server === "checking" ? "æª¢ä¸­..." : ""}
                   </div>
                   <div style={{ fontSize: 11, color: COLORS.gray400 }}>
                     {apiStatus.server === "online" ? `localhost:3001` : apiStatus.error || ""}
                   </div>
                   {apiStatus.lastCheck && (
-                    <div style={{ fontSize: 10, color: COLORS.gray400, marginTop: 4 }}>ä¸æ¬¡æª¢æ¥: {apiStatus.lastCheck}</div>
+                    <div style={{ fontSize: 10, color: COLORS.gray400, marginTop: 4 }}>æ¬¡æª¢: {apiStatus.lastCheck}</div>
                   )}
                 </div>
 
@@ -1524,14 +1524,14 @@ export default function ThreadsDashboard() {
                     fontSize: 14, fontWeight: 800, marginBottom: 4,
                     color: tokenStatus?.valid ? COLORS.emerald : !apifyToken.trim() ? COLORS.gray400 : tokenStatus ? COLORS.red : "#F59E0B",
                   }}>
-                    {tokenStatus?.valid ? "å·²é©è­" : !apifyToken.trim() ? "æªè¨­å®" : tokenStatus ? "é©è­å¤±æ" : "å¾é©è­"}
+                    {tokenStatus?.valid ? "å·²" : !apifyToken.trim() ? "è¨­" : tokenStatus ? "å¤±" : ""}
                   </div>
                   <div style={{ fontSize: 11, color: COLORS.gray400 }}>
-                    {tokenStatus?.valid ? tokenStatus.user?.username || "" : !apifyToken.trim() ? "è«å¨ä¸æ¹å¡«å¥" : ""}
+                    {tokenStatus?.valid ? tokenStatus.user?.username || "" : !apifyToken.trim() ? "å¡«" : ""}
                   </div>
                 </div>
 
-                {/* è³æåº« PostgreSQL */}
+                {/* åº« PostgreSQL */}
                 <div style={{
                   background: apiStatus.db === "connected" ? "#F0FDF4" : apiStatus.db === "checking" ? COLORS.gray50 : "#FEF2F2",
                   border: `1px solid ${apiStatus.db === "connected" ? "#BBF7D0" : apiStatus.db === "checking" ? COLORS.gray200 : "#FECACA"}`,
@@ -1550,14 +1550,14 @@ export default function ThreadsDashboard() {
                     fontSize: 14, fontWeight: 800, marginBottom: 4,
                     color: apiStatus.db === "connected" ? COLORS.emerald : apiStatus.db === "checking" ? COLORS.gray400 : COLORS.red,
                   }}>
-                    {apiStatus.db === "connected" ? "é£ç·æå" : apiStatus.db === "checking" ? "æª¢æ¥ä¸­..." : "æªé£ç·"}
+                    {apiStatus.db === "connected" ? "" : apiStatus.db === "checking" ? "æª¢ä¸­..." : ""}
                   </div>
                   <div style={{ fontSize: 11, color: COLORS.gray400 }}>
-                    {apiStatus.db === "connected" ? "å·²å¯«å¥æºå" : "è«ç¢ºèª DATABASE_URL"}
+                    {apiStatus.db === "connected" ? "å·²å¯«" : "ç¢º DATABASE_URL"}
                   </div>
                 </div>
 
-                {/* è³æçæ */}
+                {/*  */}
                 <div style={{
                   background: posts.length > 0 ? "#F0FDF4" : COLORS.gray50,
                   border: `1px solid ${posts.length > 0 ? "#BBF7D0" : COLORS.gray200}`,
@@ -1568,33 +1568,33 @@ export default function ThreadsDashboard() {
                       width: 8, height: 8, borderRadius: "50%",
                       background: posts.length > 0 ? COLORS.emerald : COLORS.gray300,
                     }} />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.gray900 }}>è³æçæ</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.gray900 }}></span>
                   </div>
                   <div style={{
                     fontSize: 14, fontWeight: 800, marginBottom: 4,
                     color: posts.length > 0 ? COLORS.emerald : COLORS.gray400,
                   }}>
-                    {posts.length > 0 ? `${posts.length} åè²¼æ` : "å°ç¡è³æ"}
+                    {posts.length > 0 ? `${posts.length} è²¼` : ""}
                   </div>
                   <div style={{ fontSize: 11, color: COLORS.gray400 }}>
                     {posts.length > 0
-                      ? `æ¶µè ${[...new Set(posts.map(p => p.keyword))].length} çµééµå­`
-                      : "è«å·è¡æå"
+                      ? `æ¶µ ${[...new Set(posts.map(p => p.keyword))].length} `
+                      : ""
                     }
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* é¡åº¦ä½¿ç¨éç£æ§ */}
+            {/* åº¦ä½¿ */}
             <div style={{
               background: COLORS.white, borderRadius: 20, border: `1px solid ${COLORS.gray100}`,
               padding: 24, marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                 <div>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>é¡åº¦ä½¿ç¨é</div>
-                  <div style={{ fontSize: 13, color: COLORS.gray400 }}>ç£æ§ Apify å¸³æ¶ç API æ¶èé¡åº¦èå·è¡è¨é</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>åº¦ä½¿</div>
+                  <div style={{ fontSize: 13, color: COLORS.gray400 }}> Apify å¸³ API åº¦</div>
                 </div>
                 <button onClick={fetchUsage} disabled={!apifyToken.trim() || usageLoading} style={{
                   padding: "8px 18px", borderRadius: 50, border: `1px solid ${COLORS.orange500}`,
@@ -1602,20 +1602,20 @@ export default function ThreadsDashboard() {
                   fontSize: 12, fontWeight: 600, cursor: !apifyToken.trim() ? "not-allowed" : "pointer",
                   transition: "all 0.2s", opacity: !apifyToken.trim() ? 0.4 : 1,
                 }}>
-                  {usageLoading ? "è¼å¥ä¸­..." : "éæ°è¼å¥"}
+                  {usageLoading ? "ä¸­..." : ""}
                 </button>
               </div>
 
               {!usageData ? (
                 <div style={{ padding: "40px 0", textAlign: "center", color: COLORS.gray400 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>å°æªè¼å¥é¡åº¦è³è¨</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>åº¦</div>
                   <div style={{ fontSize: 12 }}>
-                    {apifyToken.trim() ? "é»æãéæ°è¼å¥ãæå®æ Token é©è­å¾èªåè¼å¥" : "è«åå¡«å¥ Apify Token"}
+                    {apifyToken.trim() ? " Token " : "å¡« Apify Token"}
                   </div>
                 </div>
               ) : (
                 <>
-                  {/* ä½¿ç¨éé²åº¦æ¢ */}
+                  {/* ä½¿åº¦ */}
                   <div style={{
                     background: COLORS.gray50, borderRadius: 12, padding: 20, marginBottom: 16,
                   }}>
@@ -1629,7 +1629,7 @@ export default function ThreadsDashboard() {
                         </span>
                       </div>
                       <div style={{ fontSize: 12, color: COLORS.gray500, fontWeight: 600 }}>
-                        {usageData.account.plan} æ¹æ¡
+                        {usageData.account.plan} 
                       </div>
                     </div>
                     {/* Progress bar */}
@@ -1646,41 +1646,41 @@ export default function ThreadsDashboard() {
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
                       <span style={{ fontSize: 11, color: COLORS.gray400 }}>
-                        å·²ä½¿ç¨ {((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100).toFixed(1)}%
+                        å·²ä½¿ {((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100).toFixed(1)}%
                       </span>
                       <span style={{ fontSize: 11, color: COLORS.gray400 }}>
-                        å©é¤ ${parseFloat((usageData.usage.monthlyLimitUsd - usageData.usage.monthlyUsageUsd).toFixed(2))} USD
+                         ${parseFloat((usageData.usage.monthlyLimitUsd - usageData.usage.monthlyUsageUsd).toFixed(2))} USD
                       </span>
                     </div>
                   </div>
 
-                  {/* å¸³æ¶èéé¡è³è¨ */}
+                  {/* å¸³ */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
                     <div style={{ background: COLORS.gray50, borderRadius: 10, padding: "12px 16px" }}>
-                      <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}>å¸³è</div>
+                      <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}>å¸³</div>
                       <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900 }}>
                         {usageData.account.username}
                       </div>
                     </div>
                     <div style={{ background: COLORS.gray50, borderRadius: 10, padding: "12px 16px" }}>
-                      <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}>è¨æ¶é«ä¸é</div>
+                      <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}></div>
                       <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900 }}>
                         {(usageData.limits.maxMemoryMbytes / 1024).toFixed(0)} GB
                       </div>
                     </div>
                     <div style={{ background: COLORS.gray50, borderRadius: 10, padding: "12px 16px" }}>
-                      <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}>è³æä¿ç</div>
+                      <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}></div>
                       <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900 }}>
                         {usageData.limits.dataRetentionDays} å¤©
                       </div>
                     </div>
                   </div>
 
-                  {/* æè¿å·è¡è¨éï¼åªé¡¯ç¤ºæå¯¦éæ¸ææå·è¡ä¸­çè¨é */}
+                  {/* é¡¯ç¤ºå¯¦ä¸­ */}
                   {usageData.recentRuns?.filter(r => r.usageTotalUsd > 0 || r.computeUnits > 0 || r.status === "RUNNING").length > 0 && (
                     <div style={{ marginTop: 20 }}>
                       <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900, marginBottom: 10 }}>
-                        è¿æå·è¡è¨é ({usageData.recentRuns.filter(r => r.usageTotalUsd > 0 || r.computeUnits > 0 || r.status === "RUNNING").length})
+                         ({usageData.recentRuns.filter(r => r.usageTotalUsd > 0 || r.computeUnits > 0 || r.status === "RUNNING").length})
                       </div>
                       <div style={{ borderRadius: 10, border: `1px solid ${COLORS.gray100}`, overflow: "hidden" }}>
                         <div style={{
@@ -1688,9 +1688,9 @@ export default function ThreadsDashboard() {
                           background: COLORS.gray50, padding: "8px 14px", fontSize: 11, fontWeight: 600,
                           color: COLORS.gray500,
                         }}>
-                          <div>çæ</div>
-                          <div>å·è¡æé</div>
-                          <div style={{ textAlign: "right" }}>è²»ç¨</div>
+                          <div></div>
+                          <div></div>
+                          <div style={{ textAlign: "right" }}>è²»</div>
                         </div>
                         {usageData.recentRuns
                           .filter(r => r.usageTotalUsd > 0 || r.computeUnits > 0 || r.status === "RUNNING")
@@ -1708,7 +1708,7 @@ export default function ThreadsDashboard() {
                                 background: run.status === "SUCCEEDED" ? "#D1FAE5" : run.status === "RUNNING" ? "#DBEAFE" : "#FEE2E2",
                                 color: run.status === "SUCCEEDED" ? "#065F46" : run.status === "RUNNING" ? "#1E40AF" : "#991B1B",
                               }}>
-                                {run.status === "SUCCEEDED" ? "æå" : run.status === "RUNNING" ? "å·è¡ä¸­" : "å¤±æ"}
+                                {run.status === "SUCCEEDED" ? "" : run.status === "RUNNING" ? "ä¸­" : "å¤±"}
                               </span>
                             </div>
                             <div style={{ color: COLORS.gray500 }}>
@@ -1737,9 +1737,9 @@ export default function ThreadsDashboard() {
               background: COLORS.white, borderRadius: 20, border: `1px solid ${COLORS.gray100}`,
               padding: 24, marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
             }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>Apify API è¨­å®</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>Apify API è¨­</div>
               <div style={{ fontSize: 13, color: COLORS.gray400, marginBottom: 16 }}>
-                é£æ¥ Apify å¹³å°ä»¥åç¨èªåå Threads æ¸ææå
+                 Apify å¹³ä»¥ Threads 
               </div>
 
               <div style={{ marginBottom: 16 }}>
@@ -1764,7 +1764,7 @@ export default function ThreadsDashboard() {
                     fontSize: 12, color: COLORS.orange500, background: "none", border: "none",
                     cursor: "pointer", fontWeight: 600,
                   }}>
-                    {showConfig ? "é±è Token" : "é¡¯ç¤º Token"}
+                    {showConfig ? " Token" : "é¡¯ç¤º Token"}
                   </button>
                   <button onClick={verifyToken} disabled={!apifyToken.trim() || tokenStatus === "checking"} style={{
                     padding: "6px 18px", borderRadius: 50, border: `1px solid ${COLORS.orange500}`,
@@ -1772,7 +1772,7 @@ export default function ThreadsDashboard() {
                     cursor: !apifyToken.trim() ? "not-allowed" : "pointer", transition: "all 0.2s",
                     opacity: !apifyToken.trim() ? 0.4 : 1,
                   }}>
-                    {tokenStatus === "checking" ? "é©è­ä¸­..." : "é©è­ Token"}
+                    {tokenStatus === "checking" ? "ä¸­..." : " Token"}
                   </button>
                   {tokenStatus && tokenStatus !== "checking" && (
                     <span style={{
@@ -1780,8 +1780,8 @@ export default function ThreadsDashboard() {
                       color: tokenStatus.valid ? COLORS.emerald : COLORS.red,
                     }}>
                       {tokenStatus.valid
-                        ? `Token ææ (${tokenStatus.user?.username || ""})`
-                        : `Token ç¡æ: ${tokenStatus.error || "æªç¥é¯èª¤"}`
+                        ? `Token  (${tokenStatus.user?.username || ""})`
+                        : `Token : ${tokenStatus.error || "èª¤"}`
                       }
                     </span>
                   )}
