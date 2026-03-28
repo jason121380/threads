@@ -1189,7 +1189,7 @@ export default function ThreadsDashboard() {
               {filteredPosts.length > 0 ? filteredPosts.map(p => (
                 <PostCard key={p.id} post={p} />
               )) : (
-                <div style={{ textAlign: "center", padding: 60, color: COLORS.gray400 }}>
+                <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: 60, color: COLORS.gray400 }}>
                   <div style={{ marginBottom: 12, color: COLORS.gray300 }}><Icons.Search /></div>
                   <div style={{ fontSize: 15, fontWeight: 600 }}>
                     {posts.length === 0 ? "尚無貼文資料" : "沒有符合條件的貼文"}
@@ -1690,21 +1690,19 @@ export default function ThreadsDashboard() {
                       </div>
                       <div style={{ borderRadius: 10, border: `1px solid ${COLORS.gray100}`, overflow: "hidden" }}>
                         <div style={{
-                          display: "grid", gridTemplateColumns: "70px 1fr 80px 80px 70px",
+                          display: "grid", gridTemplateColumns: "80px 1fr 100px",
                           background: COLORS.gray50, padding: "8px 14px", fontSize: 11, fontWeight: 600,
                           color: COLORS.gray500,
                         }}>
                           <div>狀態</div>
                           <div>執行時間</div>
                           <div style={{ textAlign: "right" }}>費用</div>
-                          <div style={{ textAlign: "right" }}>運算單位</div>
-                          <div style={{ textAlign: "right" }}>耗時</div>
                         </div>
                         {usageData.recentRuns
                           .filter(r => r.usageTotalUsd > 0 || r.computeUnits > 0 || r.status === "RUNNING")
                           .map((run, i) => (
                           <div key={run.id} style={{
-                            display: "grid", gridTemplateColumns: "70px 1fr 80px 80px 70px",
+                            display: "grid", gridTemplateColumns: "80px 1fr 100px",
                             padding: "8px 14px", fontSize: 12, borderTop: `1px solid ${COLORS.gray100}`,
                             background: i % 2 === 0 ? COLORS.white : COLORS.gray50,
                             alignItems: "center",
@@ -1724,12 +1722,6 @@ export default function ThreadsDashboard() {
                             </div>
                             <div style={{ textAlign: "right", fontWeight: 600, fontFamily: "monospace", color: COLORS.gray900 }}>
                               ${parseFloat(run.usageTotalUsd.toFixed(4))}
-                            </div>
-                            <div style={{ textAlign: "right", fontFamily: "monospace", color: COLORS.gray500 }}>
-                              {parseFloat(run.computeUnits.toFixed(4))}
-                            </div>
-                            <div style={{ textAlign: "right", color: COLORS.gray400 }}>
-                              {run.durationSecs != null ? `${run.durationSecs}s` : "---"}
                             </div>
                           </div>
                         ))}
