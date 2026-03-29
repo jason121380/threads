@@ -289,7 +289,7 @@ export default function ThreadsDashboard() {
   const [addKeywordError, setAddKeywordError] = useState("");
   const [newScheduleTime, setNewScheduleTime] = useState("09:00");
   const [newScheduleEnabled, setNewScheduleEnabled] = useState(false);
-  const [postSort, setPostSort] = useState("newest"); // newest | likes | replies | reposts
+  const [postSort, setPostSort] = useState("likes"); // newest | likes | replies | reposts
   const [apifyToken, setApifyToken] = useState(() => localStorage.getItem("APIFY_TOKEN") || "");
 
   // Editing state
@@ -932,7 +932,7 @@ export default function ThreadsDashboard() {
         </nav>
 
         {/* Apify 額度摘要 */}
-        {usageData && (
+        {usageData && usageData.usage.monthlyUsageUsd != null && (
           <div style={{
             padding: "12px 14px", borderRadius: 12,
             background: COLORS.gray50, marginBottom: 8,
@@ -942,24 +942,30 @@ export default function ThreadsDashboard() {
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
               <span style={{ fontSize: 14, fontWeight: 800, color: COLORS.orange500 }}>
-                ${parseFloat(usageData.usage.monthlyUsageUsd.toFixed(2))}
+                ${usageData.usage.monthlyUsageUsd.toFixed(2)}
               </span>
-              <span style={{ fontSize: 11, color: COLORS.gray400 }}>
-                / ${parseFloat(usageData.usage.monthlyLimitUsd.toFixed(2))} USD
-              </span>
+              {usageData.usage.monthlyLimitUsd != null && (
+                <span style={{ fontSize: 11, color: COLORS.gray400 }}>
+                  / ${usageData.usage.monthlyLimitUsd.toFixed(2)} USD
+                </span>
+              )}
             </div>
-            <div style={{ width: "100%", height: 5, borderRadius: 4, background: COLORS.gray200, overflow: "hidden", marginBottom: 4 }}>
-              <div style={{
-                width: `${Math.min((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100, 100)}%`,
-                height: "100%", borderRadius: 4, transition: "width 0.6s ease",
-                background: (usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) > 0.8
-                  ? COLORS.red : (usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) > 0.5
-                  ? "#F59E0B" : COLORS.emerald,
-              }} />
-            </div>
-            <div style={{ fontSize: 10, color: COLORS.gray400 }}>
-              已使用 {((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100).toFixed(1)}%
-            </div>
+            {usageData.usage.monthlyLimitUsd != null && (
+              <>
+                <div style={{ width: "100%", height: 5, borderRadius: 4, background: COLORS.gray200, overflow: "hidden", marginBottom: 4 }}>
+                  <div style={{
+                    width: `${Math.min((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100, 100)}%`,
+                    height: "100%", borderRadius: 4, transition: "width 0.6s ease",
+                    background: (usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) > 0.8
+                      ? COLORS.red : (usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) > 0.5
+                      ? "#F59E0B" : COLORS.emerald,
+                  }} />
+                </div>
+                <div style={{ fontSize: 10, color: COLORS.gray400 }}>
+                  已使用 {((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100).toFixed(1)}%
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -1692,39 +1698,47 @@ export default function ThreadsDashboard() {
                   <div style={{
                     background: COLORS.gray50, borderRadius: 12, padding: 20, marginBottom: 16,
                   }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "baseline", marginBottom: 10, flexWrap: "wrap", gap: 4 }}>
                       <div>
                         <span style={{ fontSize: 28, fontWeight: 900, color: COLORS.orange500 }}>
-                          ${parseFloat(usageData.usage.monthlyUsageUsd.toFixed(2))} USD
+                          {usageData.usage.monthlyUsageUsd != null
+                            ? `$${usageData.usage.monthlyUsageUsd.toFixed(2)} USD`
+                            : "—"}
                         </span>
-                        <span style={{ fontSize: 14, color: COLORS.gray400, marginLeft: 4 }}>
-                          / ${parseFloat(usageData.usage.monthlyLimitUsd.toFixed(2))} USD
-                        </span>
+                        {usageData.usage.monthlyLimitUsd != null && (
+                          <span style={{ fontSize: 14, color: COLORS.gray400, marginLeft: 4 }}>
+                            / ${usageData.usage.monthlyLimitUsd.toFixed(2)} USD
+                          </span>
+                        )}
                       </div>
                       <div style={{ fontSize: 12, color: COLORS.gray500, fontWeight: 600 }}>
                         {usageData.account.plan} 方案
                       </div>
                     </div>
-                    {/* Progress bar */}
-                    <div style={{
-                      width: "100%", height: 8, borderRadius: 8, background: COLORS.gray200, overflow: "hidden",
-                    }}>
-                      <div style={{
-                        width: `${Math.min((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100, 100)}%`,
-                        height: "100%", borderRadius: 8, transition: "width 0.6s ease",
-                        background: (usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) > 0.8
-                          ? COLORS.red : (usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) > 0.5
-                          ? "#F59E0B" : COLORS.emerald,
-                      }} />
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-                      <span style={{ fontSize: 11, color: COLORS.gray400 }}>
-                        已使用 {((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100).toFixed(1)}%
-                      </span>
-                      <span style={{ fontSize: 11, color: COLORS.gray400 }}>
-                        剩餘 ${parseFloat((usageData.usage.monthlyLimitUsd - usageData.usage.monthlyUsageUsd).toFixed(2))} USD
-                      </span>
-                    </div>
+                    {/* Progress bar — 只在兩個數值都有時顯示 */}
+                    {usageData.usage.monthlyUsageUsd != null && usageData.usage.monthlyLimitUsd != null && (
+                      <>
+                        <div style={{
+                          width: "100%", height: 8, borderRadius: 8, background: COLORS.gray200, overflow: "hidden",
+                        }}>
+                          <div style={{
+                            width: `${Math.min((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100, 100)}%`,
+                            height: "100%", borderRadius: 8, transition: "width 0.6s ease",
+                            background: (usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) > 0.8
+                              ? COLORS.red : (usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) > 0.5
+                              ? "#F59E0B" : COLORS.emerald,
+                          }} />
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+                          <span style={{ fontSize: 11, color: COLORS.gray400 }}>
+                            已使用 {((usageData.usage.monthlyUsageUsd / usageData.usage.monthlyLimitUsd) * 100).toFixed(1)}%
+                          </span>
+                          <span style={{ fontSize: 11, color: COLORS.gray400 }}>
+                            剩餘 ${(usageData.usage.monthlyLimitUsd - usageData.usage.monthlyUsageUsd).toFixed(2)} USD
+                          </span>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* 帳戶與限額資訊 */}
@@ -1735,18 +1749,22 @@ export default function ThreadsDashboard() {
                         {usageData.account.username}
                       </div>
                     </div>
-                    <div style={{ background: COLORS.gray50, borderRadius: 10, padding: "12px 16px" }}>
-                      <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}>記憶體上限</div>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900 }}>
-                        {(usageData.limits.maxMemoryMbytes / 1024).toFixed(0)} GB
+                    {usageData.limits.maxMemoryMbytes != null && (
+                      <div style={{ background: COLORS.gray50, borderRadius: 10, padding: "12px 16px" }}>
+                        <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}>記憶體上限</div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900 }}>
+                          {(usageData.limits.maxMemoryMbytes / 1024).toFixed(0)} GB
+                        </div>
                       </div>
-                    </div>
-                    <div style={{ background: COLORS.gray50, borderRadius: 10, padding: "12px 16px" }}>
-                      <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}>資料保留</div>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900 }}>
-                        {usageData.limits.dataRetentionDays} 天
+                    )}
+                    {usageData.limits.dataRetentionDays != null && (
+                      <div style={{ background: COLORS.gray50, borderRadius: 10, padding: "12px 16px" }}>
+                        <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}>資料保留</div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900 }}>
+                          {usageData.limits.dataRetentionDays} 天
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* 最近執行記錄：只顯示有實際數據或執行中的記錄 */}
