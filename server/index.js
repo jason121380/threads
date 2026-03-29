@@ -446,10 +446,40 @@ app.post("/api/usage", async (req, res) => {
       }));
     }
 
-    // 5. 組合回傳資料 — 直接使用 API 原始數據，不做猜測
+    // 5. 組合回傳資料 — 從 API 原始數據中嘗試多條已知路徑
     const totalRunCost = recentRuns.reduce((sum, r) => sum + (r.usageTotalUsd || 0), 0);
 
     const planName = user.subscription?.plan?.name || user.plan?.name || "Free";
+
+    // 月用量：嘗試多條已知路徑
+    const usageUsd = monthlyUsage?.usageTotalUsd
+      ?? monthlyUsage?.totalUsageUsd
+      ?? monthlyUsage?.totalChargedUsd
+      ?? null;
+
+    // 月上限：嘗試多條已知路徑
+    const limitUsd = accountLimits?.current?.monthlyUsageUsd?.limit
+      ?? accountLimits?.limits?.maxMonthlyUsageUsd
+      ?? accountLimits?.monthlyUsageLimitUsd
+      ?? user.subscription?.monthlyUsageLimitUsd
+      ?? user.plan?.usageLimitUsd
+      ?? user.limits?.monthlyUsageUsd
+      ?? null;
+
+    // 記憶體上限
+    const maxMemoryMbytes = accountLimits?.limits?.maxActorMemoryGbytes
+      ? accountLimits.limits.maxActorMemoryGbytes * 1024
+      : (accountLimits?.current?.actorMemoryMbytes?.limit
+        ?? user.plan?.maxMemoryMbytes
+        ?? null);
+
+    // 資料保留天數
+    const dataRetentionDays = accountLimits?.limits?.dataRetentionDays
+      ?? accountLimits?.current?.dataRetentionDays?.limit
+      ?? user.plan?.dataRetentionDays
+      ?? null;
+
+    console.log("[Usage] 解析結果:", JSON.stringify({ usageUsd, limitUsd, maxMemoryMbytes, dataRetentionDays }));
 
     res.json({
       success: true,
@@ -459,16 +489,16 @@ app.post("/api/usage", async (req, res) => {
         plan: planName,
       },
       usage: {
-        monthlyUsageUsd: monthlyUsage?.usageTotalUsd ?? null,
-        monthlyLimitUsd: accountLimits?.current?.monthlyUsageUsd?.limit ?? null,
+        monthlyUsageUsd: usageUsd,
+        monthlyLimitUsd: limitUsd,
         recentRunsCost: Math.round(totalRunCost * 10000) / 10000,
         recentRunsCount: recentRuns.length,
       },
       limits: {
-        maxMemoryMbytes: accountLimits?.current?.actorMemoryMbytes?.limit ?? null,
-        dataRetentionDays: accountLimits?.current?.dataRetentionDays?.limit ?? null,
+        maxMemoryMbytes,
+        dataRetentionDays,
       },
-      // 附帶原始資料供 debug
+      // 附帶完整原始資料供前端 console debug
       _raw: {
         monthlyUsage: monthlyUsage || null,
         accountLimits: accountLimits || null,
