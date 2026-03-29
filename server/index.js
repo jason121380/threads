@@ -402,15 +402,7 @@ app.post("/api/usage", async (req, res) => {
     const userData = await userRes.json();
     const user = userData.data;
 
-    // 2. 月度使用量 (官方 API)
-    const usageRes = await fetch(`https://api.apify.com/v2/users/me/usage/monthly?token=${token}`);
-    let monthlyUsage = null;
-    if (usageRes.ok) {
-      const usageData = await usageRes.json();
-      monthlyUsage = usageData.data;
-    }
-
-    // 3. 帳戶限額 (官方 API)
+    // 2. 帳戶限額 + 目前用量（官方 /users/me/limits 同時包含 limits 和 current）
     const limitsRes = await fetch(`https://api.apify.com/v2/users/me/limits?token=${token}`);
     let accountLimits = null;
     if (limitsRes.ok) {
@@ -418,14 +410,9 @@ app.post("/api/usage", async (req, res) => {
       accountLimits = limitsData.data;
     }
 
-    // 🌟 DEBUG LOGGING 🌟
-    console.log("=== APIFY USER DEBUG ===");
-    console.log("User Plan:", JSON.stringify(user?.plan || null));
-    console.log("User Subscription:", JSON.stringify(user?.subscription || null));
-    console.log("Limits raw:", JSON.stringify(accountLimits || null));
-    console.log("========================");
+    console.log("[Usage] /users/me/limits 回傳:", JSON.stringify(accountLimits, null, 2));
 
-    // 4. 最近的 Actor Runs（最近 20 筆）
+    // 3. 最近的 Actor Runs（最近 20 筆）
     const runsRes = await fetch(
       `https://api.apify.com/v2/actor-runs?token=${token}&limit=20&desc=true`
     );
@@ -446,10 +433,15 @@ app.post("/api/usage", async (req, res) => {
       }));
     }
 
-    // 5. 組合回傳資料 — 直接使用 API 原始數據，不做猜測
+    // 4. 組合回傳資料 — 根據 Apify 官方文件結構
+    // /users/me/limits 回傳: { limits: { maxMonthlyUsageUsd, ... }, current: { monthlyUsageUsd, ... } }
     const totalRunCost = recentRuns.reduce((sum, r) => sum + (r.usageTotalUsd || 0), 0);
-
     const planName = user.subscription?.plan?.name || user.plan?.name || "Free";
+
+    // 目前月用量（從 /limits 的 current 取）
+    const usageUsd = accountLimits?.current?.monthlyUsageUsd ?? null;
+    // 月上限（從 /limits 的 limits 取）
+    const limitUsd = accountLimits?.limits?.maxMonthlyUsageUsd ?? null;
 
     res.json({
       success: true,
@@ -459,22 +451,18 @@ app.post("/api/usage", async (req, res) => {
         plan: planName,
       },
       usage: {
-        monthlyUsageUsd: monthlyUsage?.usageTotalUsd ?? null,
-        monthlyLimitUsd: accountLimits?.current?.monthlyUsageUsd?.limit ?? null,
+        monthlyUsageUsd: usageUsd,
+        monthlyLimitUsd: limitUsd,
         recentRunsCost: Math.round(totalRunCost * 10000) / 10000,
         recentRunsCount: recentRuns.length,
       },
       limits: {
-        maxMemoryMbytes: accountLimits?.current?.actorMemoryMbytes?.limit ?? null,
-        dataRetentionDays: accountLimits?.current?.dataRetentionDays?.limit ?? null,
+        maxMemoryMbytes: accountLimits?.limits?.maxActorMemoryGbytes
+          ? accountLimits.limits.maxActorMemoryGbytes * 1024
+          : null,
+        dataRetentionDays: accountLimits?.limits?.dataRetentionDays ?? null,
       },
-      // 附帶原始資料供 debug
-      _raw: {
-        monthlyUsage: monthlyUsage || null,
-        accountLimits: accountLimits || null,
-        userPlan: user.plan || null,
-        userSubscription: user.subscription || null,
-      },
+      _raw: { accountLimits },
       recentRuns: recentRuns.slice(0, 10),
     });
   } catch (err) {

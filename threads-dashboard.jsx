@@ -619,7 +619,11 @@ export default function ThreadsDashboard() {
         body: JSON.stringify({ token: apifyToken }),
       });
       const data = await res.json();
-      if (data.success) setUsageData(data);
+      if (data.success) {
+        console.log("[Usage] API 原始資料:", JSON.stringify(data._raw, null, 2));
+        console.log("[Usage] 解析結果:", { usage: data.usage, limits: data.limits });
+        setUsageData(data);
+      }
     } catch (err) {
       console.error("Usage fetch error:", err);
     } finally {
