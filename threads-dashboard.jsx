@@ -389,6 +389,20 @@ export default function ThreadsDashboard() {
     }
   }, []);
 
+  // ─── 資料庫統計 ───
+  const [dbStats, setDbStats] = useState(null);
+  const fetchDbStats = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/db-stats`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.stats) setDbStats(data.stats);
+      }
+    } catch (err) {
+      console.error("無法取得 DB 統計:", err);
+    }
+  }, []);
+
   useEffect(() => {
     checkApiHealth();
     fetchKeywords();
@@ -605,20 +619,6 @@ export default function ThreadsDashboard() {
       setTokenStatus({ valid: false, error: "無法連接 API Server，請確認後端已啟動 (npm run server)" });
     }
   };
-
-  // ─── 資料庫統計 ───
-  const [dbStats, setDbStats] = useState(null);
-  const fetchDbStats = useCallback(async () => {
-    try {
-      const res = await fetch(`${API_BASE}/api/db-stats`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.stats) setDbStats(data.stats);
-      }
-    } catch (err) {
-      console.error("無法取得 DB 統計:", err);
-    }
-  }, []);
 
   // ─── Apify 額度使用量 ───
   const [usageData, setUsageData] = useState(null); // { account, usage, limits, recentRuns }
