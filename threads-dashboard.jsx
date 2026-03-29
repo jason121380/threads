@@ -1,6 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
+// ─── Mobile Detection Hook ───
+const useIsMobile = (breakpoint = 768) => {
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < breakpoint);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < breakpoint);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [breakpoint]);
+  return isMobile;
+};
+
 // ─── Meimate Theme Constants ───
 const COLORS = {
   orange100: "#FFF5F0",
@@ -108,6 +119,11 @@ const Icons = {
   ChevronDown: () => (
     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+    </svg>
+  ),
+  Menu: () => (
+    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
     </svg>
   ),
 };
@@ -255,6 +271,8 @@ const PostCard = ({ post }) => (
 // ─── MAIN APP ───
 // ═══════════════════════════════════════════
 export default function ThreadsDashboard() {
+  const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [keywords, setKeywords] = useState(DEFAULT_KEYWORDS);
   const [posts, setPosts] = useState([]);
@@ -756,7 +774,35 @@ export default function ThreadsDashboard() {
       background: "linear-gradient(135deg, #FFF8F3 0%, #F0F4FA 50%, #F5F3FF 100%)",
       fontFamily: "'Inter','Noto Sans TC',system-ui,-apple-system,sans-serif",
       display: "flex",
+      position: "relative",
     }}>
+      {/* ─── Mobile Top Bar ─── */}
+      {isMobile && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+          height: 56, background: COLORS.white, borderBottom: `1px solid ${COLORS.gray100}`,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "0 16px", boxSizing: "border-box",
+        }}>
+          <button onClick={() => setSidebarOpen(true)} style={{
+            background: "none", border: "none", cursor: "pointer", color: COLORS.gray900,
+            padding: 4, display: "flex", alignItems: "center",
+          }}>
+            <Icons.Menu />
+          </button>
+          <div style={{ fontSize: 13, fontWeight: 800, color: COLORS.gray900, letterSpacing: "0.1em" }}>
+            LURE <span style={{ fontWeight: 400, fontSize: 11, color: COLORS.gray400 }}>THREADS RADAR</span>
+          </div>
+          <div style={{ width: 32 }} />
+        </div>
+      )}
+      {/* ─── Mobile Sidebar Overlay ─── */}
+      {isMobile && sidebarOpen && (
+        <div onClick={() => setSidebarOpen(false)} style={{
+          position: "fixed", inset: 0, zIndex: 199,
+          background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)",
+        }} />
+      )}
       {/* ─── 刪除確認 Modal ─── */}
       {confirmDeleteTarget && (
         <div style={{
@@ -842,10 +888,15 @@ export default function ThreadsDashboard() {
       )}
       {/* ─── Left Sidebar ─── */}
       <aside style={{
-        width: 230, minWidth: 230, height: "100vh", position: "sticky", top: 0,
+        width: 230, minWidth: 230, height: "100vh",
+        position: isMobile ? "fixed" : "sticky", top: 0, left: 0,
         background: COLORS.white, borderRight: `1px solid ${COLORS.gray100}`,
         display: "flex", flexDirection: "column", padding: "20px 14px",
-        boxSizing: "border-box", zIndex: 50,
+        boxSizing: "border-box",
+        zIndex: isMobile ? 200 : 50,
+        transform: isMobile && !sidebarOpen ? "translateX(-100%)" : "translateX(0)",
+        transition: "transform 0.3s ease",
+        boxShadow: isMobile && sidebarOpen ? "4px 0 20px rgba(0,0,0,0.1)" : "none",
       }}>
         {/* Logo — GMB style */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 32, padding: "0 4px" }}>
@@ -869,7 +920,7 @@ export default function ThreadsDashboard() {
             { key: "settings", label: "設定", icon: <Icons.Settings /> },
           ].map(t => (
             <SidebarNavItem key={t.key} active={activeTab === t.key} icon={t.icon} label={t.label}
-              onClick={() => setActiveTab(t.key)} />
+              onClick={() => { setActiveTab(t.key); if (isMobile) setSidebarOpen(false); }} />
           ))}
         </nav>
 
@@ -921,13 +972,16 @@ export default function ThreadsDashboard() {
       </aside>
 
       {/* ─── Main Content ─── */}
-      <main style={{ flex: 1, padding: "28px 32px 80px", minWidth: 0, overflowY: "auto", maxHeight: "100vh" }}>
+      <main style={{
+        flex: 1, minWidth: 0, overflowY: "auto", maxHeight: "100vh",
+        padding: isMobile ? "72px 14px 80px" : "28px 32px 80px",
+      }}>
 
         {/* ═══ DASHBOARD TAB ═══ */}
         {activeTab === "dashboard" && (
           <div>
             {/* Stats Row */}
-            <div style={{ display: "flex", gap: 16, marginBottom: 24, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: isMobile ? 10 : 16, marginBottom: 24, flexWrap: "wrap", flexDirection: isMobile ? "column" : "row" }}>
               <StatCard label="追蹤關鍵字" value={enabledCount} sub={`共 ${keywords.length} 組`}
                 icon={<Icons.Search />} color={COLORS.orange500} />
               <StatCard label="已收集貼文" value={totalPosts} sub={totalPosts === 0 ? "尚未抓取" : `${[...new Set(posts.map(p => p.keyword))].length} 組關鍵字`}
@@ -959,7 +1013,7 @@ export default function ThreadsDashboard() {
               )}
 
             {/* Charts Row */}
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 24 }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr", gap: 16, marginBottom: 24 }}>
               {/* Trend Chart */}
               <div style={{
                 background: COLORS.white, borderRadius: 20, border: `1px solid ${COLORS.gray100}`,
@@ -1063,9 +1117,10 @@ export default function ThreadsDashboard() {
                 {[...posts].sort((a, b) => (b.like_count + b.repost_count) - (a.like_count + a.repost_count))
                   .slice(0, 10).map((p, i) => (
                   <div key={p.id} style={{
-                    display: "flex", alignItems: "center", gap: 14, padding: "12px 16px",
+                    display: "flex", alignItems: "center", gap: isMobile ? 10 : 14, padding: isMobile ? "10px 12px" : "12px 16px",
                     borderRadius: 14, background: i === 0 ? COLORS.orange100 : COLORS.gray50,
                     border: i === 0 ? `1px solid ${COLORS.orange200}` : `1px solid transparent`,
+                    flexWrap: isMobile ? "wrap" : "nowrap",
                   }}>
                     <div style={{
                       width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
@@ -1099,8 +1154,8 @@ export default function ThreadsDashboard() {
         {activeTab === "posts" && (
           <div>
             {/* Search + Filter */}
-            <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
-              <div style={{ position: "relative", flex: 1, minWidth: 250 }}>
+            <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap", flexDirection: isMobile ? "column" : "row" }}>
+              <div style={{ position: "relative", flex: 1, minWidth: isMobile ? "auto" : 250 }}>
                 <div style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", color: COLORS.gray400 }}>
                   <Icons.Search />
                 </div>
@@ -1132,7 +1187,7 @@ export default function ThreadsDashboard() {
             </div>
 
             {/* Post count + 清除 + 排序 */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+            <div style={{ display: "flex", alignItems: isMobile ? "flex-start" : "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8, flexDirection: isMobile ? "column" : "row" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ fontSize: 13, color: COLORS.gray400 }}>
                   共 {filteredPosts.length} 則貼文
@@ -1185,7 +1240,7 @@ export default function ThreadsDashboard() {
             </div>
 
             {/* Posts Grid */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", gap: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(380px, 1fr))", gap: isMobile ? 10 : 14 }}>
               {filteredPosts.length > 0 ? filteredPosts.map(p => (
                 <PostCard key={p.id} post={p} />
               )) : (
@@ -1209,9 +1264,9 @@ export default function ThreadsDashboard() {
         {/* ═══ KEYWORDS TAB ═══ */}
         {activeTab === "keywords" && (
           <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", marginBottom: 20, flexDirection: isMobile ? "column" : "row", gap: isMobile ? 12 : 0 }}>
               <div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: COLORS.orange500 }}>關鍵字管理</div>
+                <div style={{ fontSize: isMobile ? 18 : 20, fontWeight: 800, color: COLORS.orange500 }}>關鍵字管理</div>
                 <div style={{ fontSize: 13, color: COLORS.gray400, marginTop: 4 }}>管理你的 Threads 追蹤關鍵字，Apify Actor 將按排程抓取</div>
               </div>
               <button onClick={() => setShowAddForm(!showAddForm)} style={{
@@ -1334,8 +1389,9 @@ export default function ThreadsDashboard() {
               {keywords.map((k, i) => (
                 <div key={k.id} style={{
                   background: COLORS.white, borderRadius: 20, border: `1px solid ${k.enabled ? COLORS.gray100 : COLORS.gray200}`,
-                  padding: "16px 22px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  padding: isMobile ? "14px 16px" : "16px 22px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+                  display: "flex", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center",
+                  flexDirection: isMobile ? "column" : "row", gap: isMobile ? 12 : 0,
                   opacity: k.enabled ? 1 : 0.55, transition: "all 0.2s",
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -1350,8 +1406,8 @@ export default function ThreadsDashboard() {
                     </div>
                     <div style={{ flex: 1 }}>
                       {editingId === k.id ? (
-                        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                          <input value={editForm.keyword} onChange={e => setEditForm({...editForm, keyword: e.target.value})} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${COLORS.gray200}`, fontSize: 13 }} />
+                        <div style={{ display: "flex", gap: isMobile ? 8 : 12, alignItems: "center", flexWrap: "wrap" }}>
+                          <input value={editForm.keyword} onChange={e => setEditForm({...editForm, keyword: e.target.value})} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${COLORS.gray200}`, fontSize: 13, minWidth: isMobile ? "100%" : "auto" }} />
                           <select value={editForm.sort_option} onChange={e => setEditForm({...editForm, sort_option: e.target.value})} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${COLORS.gray200}`, fontSize: 13 }}>
                             <option value="recent">最新</option>
                             <option value="top">熱門</option>
@@ -1394,7 +1450,7 @@ export default function ThreadsDashboard() {
                       )}
                     </div>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 10 : 14, width: isMobile ? "100%" : "auto", justifyContent: isMobile ? "flex-end" : "flex-start" }}>
                     {editingId === k.id ? (
                       <>
                         <button onClick={saveEditKeyword} style={{ background: COLORS.emerald, color: COLORS.white, padding: "8px 16px", borderRadius: 50, border: "none", cursor: "pointer", fontWeight: 600, fontSize: 13 }}>
@@ -1483,7 +1539,7 @@ export default function ThreadsDashboard() {
                 </button>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr 1fr", gap: 12 }}>
                 {/* 後端伺服器 */}
                 <div style={{
                   background: apiStatus.server === "online" ? "#F0FDF4" : apiStatus.server === "checking" ? COLORS.gray50 : "#FEF2F2",
@@ -1661,7 +1717,7 @@ export default function ThreadsDashboard() {
                   </div>
 
                   {/* 帳戶與限額資訊 */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
                     <div style={{ background: COLORS.gray50, borderRadius: 10, padding: "12px 16px" }}>
                       <div style={{ fontSize: 11, color: COLORS.gray400, marginBottom: 4 }}>帳號</div>
                       <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900 }}>
@@ -1690,7 +1746,7 @@ export default function ThreadsDashboard() {
                       </div>
                       <div style={{ borderRadius: 10, border: `1px solid ${COLORS.gray100}`, overflow: "hidden" }}>
                         <div style={{
-                          display: "grid", gridTemplateColumns: "80px 1fr 100px",
+                          display: "grid", gridTemplateColumns: isMobile ? "60px 1fr 70px" : "80px 1fr 100px",
                           background: COLORS.gray50, padding: "8px 14px", fontSize: 11, fontWeight: 600,
                           color: COLORS.gray500,
                         }}>
@@ -1702,7 +1758,7 @@ export default function ThreadsDashboard() {
                           .filter(r => r.usageTotalUsd > 0 || r.computeUnits > 0 || r.status === "RUNNING")
                           .map((run, i) => (
                           <div key={run.id} style={{
-                            display: "grid", gridTemplateColumns: "80px 1fr 100px",
+                            display: "grid", gridTemplateColumns: isMobile ? "60px 1fr 70px" : "80px 1fr 100px",
                             padding: "8px 14px", fontSize: 12, borderTop: `1px solid ${COLORS.gray100}`,
                             background: i % 2 === 0 ? COLORS.white : COLORS.gray50,
                             alignItems: "center",
