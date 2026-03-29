@@ -479,10 +479,13 @@ export default function ThreadsDashboard() {
   }).filter(p => {
     if (!p.caption || !p.caption.trim()) return false;
     if (strictKeywordFilter && selectedKeyword !== "全部") {
-      // 不分大小寫的精確符合
       return p.caption.toLowerCase().includes(selectedKeyword.toLowerCase());
     }
     return true;
+  }).filter((p, i, arr) => {
+    // 依 caption 去重，保留排序後第一筆（互動量最高或最新的）
+    const key = (p.caption || "").trim().toLowerCase();
+    return arr.findIndex(x => (x.caption || "").trim().toLowerCase() === key) === i;
   });
 
   // Archive all posts
@@ -1115,6 +1118,10 @@ export default function ThreadsDashboard() {
               ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {[...posts].sort((a, b) => (b.like_count + b.repost_count) - (a.like_count + a.repost_count))
+                  .filter((p, i, arr) => {
+                    const key = (p.caption || "").trim().toLowerCase();
+                    return key && arr.findIndex(x => (x.caption || "").trim().toLowerCase() === key) === i;
+                  })
                   .slice(0, 10).map((p, i) => (
                   <div key={p.id} style={{
                     display: "flex", alignItems: "center", gap: isMobile ? 10 : 14, padding: isMobile ? "10px 12px" : "12px 16px",
