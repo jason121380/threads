@@ -289,7 +289,7 @@ export default function ThreadsDashboard() {
   const [addKeywordError, setAddKeywordError] = useState("");
   const [newScheduleTime, setNewScheduleTime] = useState("09:00");
   const [newScheduleEnabled, setNewScheduleEnabled] = useState(false);
-  const [postSort, setPostSort] = useState("newest"); // newest | likes | replies | reposts
+  const [postSort, setPostSort] = useState("likes"); // newest | likes | replies | reposts
   const [apifyToken, setApifyToken] = useState(() => localStorage.getItem("APIFY_TOKEN") || "");
 
   // Editing state
