@@ -1005,8 +1005,10 @@ export default function ThreadsDashboard() {
 
       {/* ─── Main Content ─── */}
       <main style={{
-        flex: 1, minWidth: 0, overflowY: "auto", maxHeight: "100vh",
-        padding: isMobile ? "72px 14px 80px" : "28px 32px 80px",
+        flex: 1, minWidth: 0, overflowY: "auto",
+        height: isMobile ? "calc(100vh - 56px)" : "100vh",
+        marginTop: isMobile ? 56 : 0,
+        padding: isMobile ? "16px 14px 80px" : "28px 32px 80px",
       }}>
 
         {/* ═══ DASHBOARD TAB ═══ */}
