@@ -436,7 +436,8 @@ app.post("/api/usage", async (req, res) => {
     // 4. 組合回傳資料 — 根據 Apify 官方文件結構
     // /users/me/limits 回傳: { limits: { maxMonthlyUsageUsd, ... }, current: { monthlyUsageUsd, ... } }
     const totalRunCost = recentRuns.reduce((sum, r) => sum + (r.usageTotalUsd || 0), 0);
-    const planName = user.subscription?.plan?.name || user.plan?.name || "Free";
+    // plan.id = "Personal" | "Free" | ... ; plan.description = 完整描述
+    const planName = user.plan?.id || user.plan?.name || user.subscription?.plan?.name || "Free";
 
     // 目前月用量（從 /limits 的 current 取）
     const usageUsd = accountLimits?.current?.monthlyUsageUsd ?? null;
