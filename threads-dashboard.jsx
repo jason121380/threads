@@ -243,7 +243,11 @@ const PostCard = ({ post }) => (
     </div>
 
     {/* Content */}
-    <p style={{ fontSize: 15, lineHeight: 1.65, color: COLORS.gray900, margin: 0, marginBottom: 14 }}>
+    <p style={{
+      fontSize: 15, lineHeight: 1.65, color: COLORS.gray900, margin: 0, marginBottom: 14,
+      overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical",
+      wordBreak: "break-word",
+    }}>
       {post.caption}
     </p>
 
