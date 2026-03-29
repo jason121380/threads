@@ -564,6 +564,62 @@ app.get("/api/scrape-history", async (req, res) => {
   }
 });
 
+// ─── 資料庫統計 API ───
+app.get("/api/db-stats", async (req, res) => {
+  if (!pool) return res.json({ success: true, stats: null });
+  try {
+    const result = await pool.query(`
+      SELECT
+        COUNT(*)::int AS total_posts,
+        COUNT(*) FILTER (WHERE is_archived = false)::int AS active_posts,
+        COUNT(*) FILTER (WHERE is_archived = true)::int AS archived_posts,
+        COUNT(DISTINCT keyword) AS keyword_count,
+        MIN(scraped_at) AS first_scraped,
+        MAX(scraped_at) AS last_scraped,
+        COALESCE(SUM(like_count), 0)::int AS total_likes,
+        COALESCE(SUM(comment_count), 0)::int AS total_comments,
+        COALESCE(SUM(repost_count), 0)::int AS total_reposts
+      FROM threads_posts
+    `);
+    const row = result.rows[0];
+
+    // 每個關鍵字的貼文數
+    const kwResult = await pool.query(`
+      SELECT keyword,
+             COUNT(*)::int AS total,
+             COUNT(*) FILTER (WHERE is_archived = false)::int AS active,
+             MAX(scraped_at) AS last_scraped
+      FROM threads_posts
+      GROUP BY keyword
+      ORDER BY total DESC
+    `);
+
+    res.json({
+      success: true,
+      stats: {
+        totalPosts: row.total_posts,
+        activePosts: row.active_posts,
+        archivedPosts: row.archived_posts,
+        keywordCount: parseInt(row.keyword_count),
+        firstScraped: row.first_scraped,
+        lastScraped: row.last_scraped,
+        totalLikes: row.total_likes,
+        totalComments: row.total_comments,
+        totalReposts: row.total_reposts,
+        byKeyword: kwResult.rows.map(r => ({
+          keyword: r.keyword,
+          total: r.total,
+          active: r.active,
+          lastScraped: r.last_scraped,
+        })),
+      },
+    });
+  } catch (err) {
+    console.error("[DB Stats] 失敗:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── 關鍵字管理 API (針對資料庫) ───
 app.get("/api/keywords", async (req, res) => {
   if (!pool) return res.json({ success: true, keywords: [] });

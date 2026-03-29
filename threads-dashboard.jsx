@@ -394,6 +394,7 @@ export default function ThreadsDashboard() {
     fetchKeywords();
     fetchPosts();
     fetchScrapeHistory();
+    fetchDbStats();
     // 若有已儲存的 token，自動靜默驗證
     const savedToken = localStorage.getItem("APIFY_TOKEN");
     if (savedToken) {
@@ -415,7 +416,7 @@ export default function ThreadsDashboard() {
     }
     const interval = setInterval(checkApiHealth, 30000);
     return () => clearInterval(interval);
-  }, [checkApiHealth, fetchKeywords, fetchPosts, fetchScrapeHistory]);
+  }, [checkApiHealth, fetchKeywords, fetchPosts, fetchScrapeHistory, fetchDbStats]);
 
   // ─── 從真實 posts 計算趨勢資料 ───
   const trendData = (() => {
@@ -604,6 +605,20 @@ export default function ThreadsDashboard() {
       setTokenStatus({ valid: false, error: "無法連接 API Server，請確認後端已啟動 (npm run server)" });
     }
   };
+
+  // ─── 資料庫統計 ───
+  const [dbStats, setDbStats] = useState(null);
+  const fetchDbStats = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/db-stats`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.stats) setDbStats(data.stats);
+      }
+    } catch (err) {
+      console.error("無法取得 DB 統計:", err);
+    }
+  }, []);
 
   // ─── Apify 額度使用量 ───
   const [usageData, setUsageData] = useState(null); // { account, usage, limits, recentRuns }
@@ -1667,6 +1682,113 @@ export default function ThreadsDashboard() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* 資料庫統計 */}
+            <div style={{
+              background: COLORS.white, borderRadius: 20, border: `1px solid ${COLORS.gray100}`,
+              padding: 24, marginBottom: 16, boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: COLORS.gray900, marginBottom: 4 }}>資料庫統計</div>
+                  <div style={{ fontSize: 13, color: COLORS.gray400 }}>歷史抓取資料總覽（含已封存）</div>
+                </div>
+                <button onClick={fetchDbStats} style={{
+                  padding: "8px 18px", borderRadius: 50, border: `1px solid ${COLORS.gray200}`,
+                  background: COLORS.white, color: COLORS.gray500, fontSize: 12, fontWeight: 600,
+                  cursor: "pointer", transition: "all 0.2s",
+                }}>
+                  重新整理
+                </button>
+              </div>
+
+              {!dbStats ? (
+                <div style={{ padding: "40px 0", textAlign: "center", color: COLORS.gray400 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600 }}>載入中...</div>
+                </div>
+              ) : (
+                <>
+                  {/* 總覽數字 */}
+                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+                    <div style={{ background: COLORS.orange100, borderRadius: 12, padding: "14px 16px", textAlign: "center" }}>
+                      <div style={{ fontSize: 24, fontWeight: 900, color: COLORS.orange500 }}>{dbStats.totalPosts}</div>
+                      <div style={{ fontSize: 11, color: COLORS.gray500, fontWeight: 600, marginTop: 4 }}>歷史總貼文</div>
+                    </div>
+                    <div style={{ background: "#F0FDF4", borderRadius: 12, padding: "14px 16px", textAlign: "center" }}>
+                      <div style={{ fontSize: 24, fontWeight: 900, color: COLORS.emerald }}>{dbStats.activePosts}</div>
+                      <div style={{ fontSize: 11, color: COLORS.gray500, fontWeight: 600, marginTop: 4 }}>目前顯示</div>
+                    </div>
+                    <div style={{ background: COLORS.gray50, borderRadius: 12, padding: "14px 16px", textAlign: "center" }}>
+                      <div style={{ fontSize: 24, fontWeight: 900, color: COLORS.gray400 }}>{dbStats.archivedPosts}</div>
+                      <div style={{ fontSize: 11, color: COLORS.gray500, fontWeight: 600, marginTop: 4 }}>已封存</div>
+                    </div>
+                    <div style={{ background: COLORS.gray50, borderRadius: 12, padding: "14px 16px", textAlign: "center" }}>
+                      <div style={{ fontSize: 24, fontWeight: 900, color: COLORS.gray900 }}>{dbStats.keywordCount}</div>
+                      <div style={{ fontSize: 11, color: COLORS.gray500, fontWeight: 600, marginTop: 4 }}>關鍵字數</div>
+                    </div>
+                  </div>
+
+                  {/* 互動量總計 */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+                    <div style={{ background: COLORS.gray50, borderRadius: 10, padding: "12px 16px", textAlign: "center" }}>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: "#ef4444" }}>{formatNum(dbStats.totalLikes)}</div>
+                      <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>總按讚</div>
+                    </div>
+                    <div style={{ background: COLORS.gray50, borderRadius: 10, padding: "12px 16px", textAlign: "center" }}>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: "#3B82F6" }}>{formatNum(dbStats.totalComments)}</div>
+                      <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>總留言</div>
+                    </div>
+                    <div style={{ background: COLORS.gray50, borderRadius: 10, padding: "12px 16px", textAlign: "center" }}>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: COLORS.orange500 }}>{formatNum(dbStats.totalReposts)}</div>
+                      <div style={{ fontSize: 11, color: COLORS.gray500, marginTop: 2 }}>總轉發</div>
+                    </div>
+                  </div>
+
+                  {/* 各關鍵字明細 */}
+                  {dbStats.byKeyword?.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.gray900, marginBottom: 10 }}>各關鍵字貼文數</div>
+                      <div style={{ borderRadius: 10, border: `1px solid ${COLORS.gray100}`, overflow: "hidden" }}>
+                        <div style={{
+                          display: "grid", gridTemplateColumns: isMobile ? "1fr 60px 60px" : "1fr 80px 80px 120px",
+                          background: COLORS.gray50, padding: "8px 14px", fontSize: 11, fontWeight: 600, color: COLORS.gray500,
+                        }}>
+                          <div>關鍵字</div>
+                          <div style={{ textAlign: "right" }}>總數</div>
+                          <div style={{ textAlign: "right" }}>顯示中</div>
+                          {!isMobile && <div style={{ textAlign: "right" }}>最後抓取</div>}
+                        </div>
+                        {dbStats.byKeyword.map((kw, i) => (
+                          <div key={kw.keyword} style={{
+                            display: "grid", gridTemplateColumns: isMobile ? "1fr 60px 60px" : "1fr 80px 80px 120px",
+                            padding: "10px 14px", fontSize: 13, borderTop: `1px solid ${COLORS.gray100}`,
+                            background: i % 2 === 0 ? COLORS.white : COLORS.gray50,
+                            alignItems: "center",
+                          }}>
+                            <div style={{ fontWeight: 600, color: COLORS.gray900 }}>{kw.keyword}</div>
+                            <div style={{ textAlign: "right", fontWeight: 700, color: COLORS.orange500 }}>{kw.total}</div>
+                            <div style={{ textAlign: "right", color: COLORS.gray500 }}>{kw.active}</div>
+                            {!isMobile && (
+                              <div style={{ textAlign: "right", fontSize: 11, color: COLORS.gray400 }}>
+                                {kw.lastScraped ? new Date(kw.lastScraped).toLocaleString("zh-TW", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "---"}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 時間資訊 */}
+                  {dbStats.firstScraped && (
+                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, fontSize: 11, color: COLORS.gray400 }}>
+                      <span>首次抓取：{new Date(dbStats.firstScraped).toLocaleDateString("zh-TW")}</span>
+                      <span>最後抓取：{new Date(dbStats.lastScraped).toLocaleDateString("zh-TW")}</span>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
 
             {/* 額度使用量監控 */}
