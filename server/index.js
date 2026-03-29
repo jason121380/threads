@@ -446,51 +446,35 @@ app.post("/api/usage", async (req, res) => {
       }));
     }
 
-    // 5. 組合回傳資料
+    // 5. 組合回傳資料 — 直接使用 API 原始數據，不做猜測
     const totalRunCost = recentRuns.reduce((sum, r) => sum + (r.usageTotalUsd || 0), 0);
 
-    const usageUsd = monthlyUsage?.usageTotalUsd ?? totalRunCost;
-
-    // 更精確地判斷方案
     const planName = user.subscription?.plan?.name || user.plan?.name || "Free";
-    
-    // 從 `user/me/limits` 正確抓取 `limits.maxMonthlyUsageUsd`
-    let limitUsd = accountLimits?.limits?.maxMonthlyUsageUsd
-      ?? accountLimits?.monthlyUsageLimitUsd
-      ?? user.subscription?.monthlyUsageLimitUsd
-      ?? accountLimits?.current?.monthlyUsageUsd?.limit
-      ?? user.plan?.usageLimitUsd
-      ?? user.limits?.monthlyUsageUsd
-      ?? 5.00;
-
-    // 如果目前花費已經超過了判斷出的 limit，那代表極大可能是採用 Pay as you go 無硬性上限，或限制更高
-    if (usageUsd > limitUsd) {
-      if (usageUsd > 5 && limitUsd === 5) limitUsd = 49.0;
-      if (usageUsd > limitUsd) limitUsd = usageUsd * 1.2;
-    }
 
     res.json({
       success: true,
       account: {
         username: user.username,
         email: user.email,
-        plan: limitUsd === 29 ? "Starter" : planName,
+        plan: planName,
       },
       usage: {
-        monthlyUsageUsd: Math.round(usageUsd * 10000) / 10000,
-        monthlyLimitUsd: limitUsd,
+        monthlyUsageUsd: monthlyUsage?.usageTotalUsd ?? null,
+        monthlyLimitUsd: accountLimits?.current?.monthlyUsageUsd?.limit ?? null,
         recentRunsCost: Math.round(totalRunCost * 10000) / 10000,
         recentRunsCount: recentRuns.length,
       },
       limits: {
-        maxMemoryMbytes: accountLimits?.limits?.maxActorMemoryGbytes 
-          ? accountLimits.limits.maxActorMemoryGbytes * 1024
-          : (accountLimits?.current?.actorMemoryMbytes?.limit ?? user.plan?.maxMemoryMbytes ?? 8192),
-        dataRetentionDays: accountLimits?.limits?.dataRetentionDays
-          ?? accountLimits?.current?.dataRetentionDays?.limit
-          ?? user.plan?.dataRetentionDays ?? 7,
+        maxMemoryMbytes: accountLimits?.current?.actorMemoryMbytes?.limit ?? null,
+        dataRetentionDays: accountLimits?.current?.dataRetentionDays?.limit ?? null,
       },
-      monthlyDetail: monthlyUsage || null,
+      // 附帶原始資料供 debug
+      _raw: {
+        monthlyUsage: monthlyUsage || null,
+        accountLimits: accountLimits || null,
+        userPlan: user.plan || null,
+        userSubscription: user.subscription || null,
+      },
       recentRuns: recentRuns.slice(0, 10),
     });
   } catch (err) {
